@@ -10,96 +10,102 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     
     <style>
-        /* Pequenos ajustes para animações suaves */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        body { font-family: 'Inter', sans-serif; }
+        
+        /* Ajustes para animações suaves */
         .transition-all { transition-property: all; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 300ms; }
         .hidden { display: none !important; }
         
-        /* Ajuste para a nova barra de scroll da tabela em Modo Escuro */
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: #172554; border-radius: 4px;} /* blue-950 */
-        ::-webkit-scrollbar-thumb { background: #1e40af; border-radius: 4px; } /* blue-800 */
-        ::-webkit-scrollbar-thumb:hover { background: #2563eb; } /* blue-500 */
+        /* Ajuste para a barra de scroll moderna */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.1); border-radius: 4px;}
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.4); }
 
-        /* Garante que as opções do select fiquem visíveis no tema escuro */
-        select option { background-color: #1e3a8a; color: white; }
+        select option { background-color: #0f172a; color: #f8fafc; }
     </style>
 </head>
-<!-- Imagem de fundo puxada diretamente do seu GitHub -->
-<body class="min-h-screen font-sans text-blue-50 relative bg-cover bg-center bg-no-repeat bg-fixed selection:bg-blue-500 selection:text-white" style="background-image: url('https://raw.githubusercontent.com/tiagomedeiros-star/converso-cartao-rfid/main/capa.jpg');">
+<!-- Imagem de fundo puxada do seu GitHub -->
+<body class="min-h-screen text-slate-200 relative bg-cover bg-center bg-no-repeat bg-fixed selection:bg-cyan-500 selection:text-white" style="background-image: url('https://raw.githubusercontent.com/tiagomedeiros-star/converso-cartao-rfid/main/capa.jpg');">
 
-    <!-- Camada de vidro fosco azul escura para a imagem não atrapalhar a leitura -->
-    <div class="absolute inset-0 bg-blue-950/85 backdrop-blur-[3px] z-0 pointer-events-none"></div>
+    <!-- Overlay Gradiente Moderno + Blur -->
+    <div class="absolute inset-0 bg-gradient-to-br from-slate-950/80 via-blue-950/80 to-indigo-950/90 backdrop-blur-[6px] z-0 pointer-events-none"></div>
 
-    <div class="relative z-10 p-4 md:p-8 max-w-6xl mx-auto space-y-6">
+    <div class="relative z-10 p-4 md:p-8 max-w-7xl mx-auto space-y-6">
         
-        <!-- Cabeçalho -->
-        <header class="bg-blue-900/90 rounded-2xl shadow-2xl border border-blue-800 p-6 flex items-center gap-4">
-            <div class="bg-blue-600 p-3 rounded-xl text-white shadow-lg">
-                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M8 3H3v5"/><path d="M12 22v-8"/><path d="m21 3-6 6"/><path d="m3 3 6 6"/><path d="m21 21-6-6"/><path d="m3 21 6-6"/></svg>
+        <!-- Cabeçalho Glassmorphism -->
+        <header class="bg-white/5 backdrop-blur-md rounded-2xl shadow-2xl border border-white/10 p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div class="flex items-center gap-5">
+                <div class="bg-gradient-to-br from-cyan-400 to-blue-600 p-3.5 rounded-2xl text-white shadow-lg shadow-blue-500/30 border border-white/20">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M8 3H3v5"/><path d="M12 22v-8"/><path d="m21 3-6 6"/><path d="m3 3 6 6"/><path d="m21 21-6-6"/><path d="m3 21 6-6"/></svg>
+                </div>
+                <div>
+                    <h1 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-400 tracking-tight">Conversor RFID</h1>
+                    <p class="text-slate-400 text-sm mt-0.5 font-medium">Conversão dinâmica de cartões e importação em lote.</p>
+                </div>
             </div>
-            <div>
-                <h1 class="text-2xl font-bold text-white">Conversor RFID Dinâmico</h1>
-                <p class="text-blue-300 text-sm">Converta números de cartões em lote ou importe direto de planilhas.</p>
+            
+            <!-- Ações Globais Header -->
+            <div class="flex gap-3 w-full md:w-auto">
+                <button id="importBtn" class="flex-1 md:flex-none items-center justify-center gap-2 text-sm font-semibold bg-white/5 hover:bg-white/10 border border-white/10 text-white py-2.5 px-4 rounded-xl transition-all flex shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+                    Importar Ficheiro
+                </button>
+                <input type="file" id="fileInput" accept=".csv, .xls, .xlsx" class="hidden" />
             </div>
         </header>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
             
             <!-- Painel Esquerdo: Entradas -->
-            <div class="md:col-span-1 space-y-4">
-                <div class="bg-blue-900/90 rounded-2xl shadow-2xl border border-blue-800 p-5">
-                    <h2 class="text-lg font-semibold flex items-center gap-2 mb-4 text-white">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-400"><path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/></svg>
+            <div class="lg:col-span-4 space-y-6">
+                <div class="bg-white/5 backdrop-blur-md rounded-2xl shadow-2xl border border-white/10 p-6 flex flex-col h-full">
+                    <h2 class="text-sm font-bold tracking-widest uppercase flex items-center gap-2 mb-6 text-slate-300">
+                        <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
                         Configuração
                     </h2>
                     
-                    <div class="space-y-4">
+                    <div class="space-y-5 flex-1 flex flex-col">
                         <div>
-                            <label class="block text-sm font-medium text-blue-200 mb-1">Regra do Cliente</label>
-                            <select id="ruleSelect" class="w-full border border-blue-700 rounded-lg p-2.5 bg-blue-950 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all shadow-inner">
-                                <option value="femsa">Padrão 26 Bits (Femsa/Invertido - Ex: TW, Femsa)</option>
-                                <option value="normal26">Padrão 26 Bits (Demais Clientes - Sem Inverter)</option>
-                                <option value="hexToDec">Padrão 32 Bits (Hexa para Decimal - Ex: Ultragaz)</option>
-                            </select>
-                            <p id="ruleDescription" class="text-xs text-blue-300 mt-2 bg-blue-950/60 p-2 rounded">
+                            <label class="block text-sm font-medium text-slate-300 mb-2">Regra do Cliente</label>
+                            <div class="relative">
+                                <select id="ruleSelect" class="w-full appearance-none border border-white/10 rounded-xl p-3.5 bg-black/20 text-white focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 outline-none transition-all shadow-inner hover:bg-black/30 cursor-pointer">
+                                    <option value="femsa">26 Bits (Invertido - Ex: TW, Femsa)</option>
+                                    <option value="normal26">26 Bits (Padrão - Demais Clientes)</option>
+                                    <option value="hexToDec">32 Bits (Hexa Direto - Ex: Ultragaz)</option>
+                                </select>
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-400">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                </div>
+                            </div>
+                            <p id="ruleDescription" class="text-xs text-slate-400 mt-3 bg-black/10 border border-white/5 p-3 rounded-lg leading-relaxed">
                                 Lê Decimal -> Converte para Hexa -> Inverte a ordem dos pares de bytes -> Converte para Decimal.
                             </p>
                         </div>
 
-                        <div>
-                            <div class="flex justify-between items-end mb-1">
-                                <label class="block text-sm font-medium text-blue-200">Valores Lidos</label>
-                                <div class="flex items-center gap-2">
-                                    <!-- Botão de Importar -->
-                                    <button 
-                                        id="importBtn"
-                                        class="flex items-center gap-1.5 text-xs font-medium bg-blue-800 hover:bg-blue-700 border border-blue-700 text-blue-100 py-1 px-2.5 rounded transition-colors shadow-sm"
-                                        title="Importar CSV ou Excel"
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
-                                        Importar Ficheiro
-                                    </button>
-                                    <input type="file" id="fileInput" accept=".csv, .xls, .xlsx" class="hidden" />
-
-                                    <span class="text-white bg-blue-600 px-2 py-0.5 rounded text-xs font-bold shadow-sm" id="linesCount">
-                                        0 linhas
-                                    </span>
-                                </div>
+                        <div class="flex-1 flex flex-col pt-2">
+                            <div class="flex justify-between items-end mb-2">
+                                <label class="block text-sm font-medium text-slate-300">Data Input Stream</label>
+                                <span class="text-cyan-100 bg-cyan-500/20 border border-cyan-500/30 px-2.5 py-0.5 rounded-full text-xs font-bold tracking-wide" id="linesCount">
+                                    0 linhas
+                                </span>
                             </div>
                             <textarea 
                                 id="inputText"
-                                placeholder="Cole os números aqui ou importe um ficheiro...&#10;381224755&#10;254759362"
-                                class="w-full h-64 border border-blue-700 rounded-lg p-3 bg-blue-950 text-blue-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none font-mono text-sm resize-none transition-all placeholder-blue-500/50 shadow-inner"
+                                placeholder="Insira ou cole os números aqui..."
+                                class="w-full flex-1 min-h-[250px] border border-white/10 rounded-xl p-4 bg-black/20 text-slate-100 focus:bg-black/40 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 outline-none font-mono text-sm resize-none transition-all placeholder-slate-600 shadow-inner"
                             ></textarea>
                         </div>
 
-                        <div class="flex gap-2">
+                        <div class="pt-2">
                             <button 
                                 id="clearBtn"
-                                class="w-full bg-blue-800 border border-blue-700 hover:bg-blue-700 text-blue-100 font-medium py-2.5 px-4 rounded-lg transition-colors flex justify-center items-center gap-2 shadow-sm"
+                                class="w-full bg-red-500/10 border border-red-500/20 hover:bg-red-500 hover:text-white text-red-400 font-semibold py-3 px-4 rounded-xl transition-all flex justify-center items-center gap-2 shadow-sm"
                                 title="Limpar tudo"
                             >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
                                 Limpar Dados
                             </button>
                         </div>
@@ -108,37 +114,33 @@
             </div>
 
             <!-- Painel Direito: Resultados -->
-            <div class="md:col-span-2">
-                <div class="bg-blue-900/90 rounded-2xl shadow-2xl border border-blue-800 p-0 overflow-hidden flex flex-col h-full">
+            <div class="lg:col-span-8">
+                <div class="bg-white/5 backdrop-blur-md rounded-2xl shadow-2xl border border-white/10 p-0 overflow-hidden flex flex-col h-full min-h-[500px]">
                     
-                    <div class="p-5 border-b border-blue-800 flex justify-between items-center bg-blue-950/50">
-                        <h2 class="text-lg font-semibold flex items-center gap-2 text-white">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-400"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M8 13h2"/><path d="M8 17h2"/><path d="M14 13h2"/><path d="M14 17h2"/></svg>
+                    <div class="p-6 border-b border-white/10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-black/10">
+                        <h2 class="text-sm font-bold tracking-widest uppercase flex items-center gap-2 text-slate-300">
+                            <span class="w-2 h-2 rounded-full bg-blue-500"></span>
                             Resultados
                         </h2>
                         
-                        <div id="actionsContainer" class="flex gap-2 hidden">
+                        <div id="actionsContainer" class="flex flex-wrap gap-2 hidden w-full sm:w-auto">
                             <button 
                                 id="copyDecimalBtn"
-                                class="flex items-center gap-1.5 text-sm font-medium bg-blue-600 hover:bg-blue-500 text-white py-1.5 px-3 rounded-md transition-colors shadow-sm"
+                                class="flex-1 sm:flex-none items-center justify-center gap-2 text-sm font-bold bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white py-2 px-4 rounded-xl transition-all shadow-lg shadow-blue-500/25 flex"
                             >
-                                <span id="copyDecimalIcon">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
-                                </span>
+                                <span id="copyDecimalIcon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg></span>
                                 <span id="copyDecimalText">Copiar Decimal</span>
                             </button>
                             <button 
                                 id="copyBtn"
-                                class="flex items-center gap-1.5 text-sm font-medium bg-blue-800 border border-blue-700 hover:bg-blue-700 text-white py-1.5 px-3 rounded-md transition-colors shadow-sm"
+                                class="flex-1 sm:flex-none items-center justify-center gap-2 text-sm font-medium bg-white/10 hover:bg-white/20 border border-white/10 text-white py-2 px-4 rounded-xl transition-all flex"
                             >
-                                <span id="copyIcon">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
-                                </span>
+                                <span id="copyIcon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg></span>
                                 <span id="copyText">Copiar Tudo</span>
                             </button>
                             <button 
                                 id="exportBtn"
-                                class="flex items-center gap-1.5 text-sm font-medium bg-green-600 hover:bg-green-500 text-white py-1.5 px-3 rounded-md transition-colors shadow-sm"
+                                class="flex-1 sm:flex-none items-center justify-center gap-2 text-sm font-medium bg-white/10 hover:bg-white/20 border border-white/10 text-white py-2 px-4 rounded-xl transition-all flex"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
                                 Exportar CSV
@@ -147,27 +149,29 @@
                     </div>
 
                     <!-- Container da tabela com scroll interno e altura máxima limitados -->
-                    <div id="tableContainer" class="overflow-auto flex-1 p-0 relative max-h-[600px]">
+                    <div id="tableContainer" class="overflow-auto flex-1 p-0 relative max-h-[600px] lg:max-h-none">
                         <!-- Estado Vazio -->
-                        <div id="emptyState" class="h-64 flex flex-col items-center justify-center text-blue-300 p-6 text-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mb-3 opacity-50"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M8 13h2"/><path d="M8 17h2"/><path d="M14 13h2"/><path d="M14 17h2"/></svg>
-                            <p class="text-blue-100 font-medium">Nenhum dado processado ainda.</p>
-                            <p class="text-sm mt-1 text-blue-400">Cole os números ou importe uma planilha, a conversão é automática.</p>
+                        <div id="emptyState" class="absolute inset-0 flex flex-col items-center justify-center text-slate-500 p-6 text-center">
+                            <div class="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="opacity-60"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M8 13h2"/><path d="M8 17h2"/><path d="M14 13h2"/><path d="M14 17h2"/></svg>
+                            </div>
+                            <p class="text-slate-300 font-medium">Nenhum registo processado.</p>
+                            <p class="text-sm mt-1 max-w-xs">Cole números ou importe uma planilha para ver a conversão em tempo real.</p>
                         </div>
 
                         <!-- Tabela de Resultados -->
                         <table id="resultsTable" class="w-full text-left border-collapse text-sm hidden relative">
                             <!-- Cabeçalho Fixo (Sticky) -->
-                            <thead class="sticky top-0 z-10 bg-blue-950/90 backdrop-blur-sm shadow-sm border-b border-blue-800">
-                                <tr class="text-blue-200">
-                                    <th class="py-3 px-4 font-semibold">Valor Lido</th>
-                                    <th class="py-3 px-4 font-semibold">Hexadecimal</th>
-                                    <th id="colFirst" class="py-3 px-4 font-semibold hidden text-xs text-blue-400">FIRST</th>
-                                    <th id="colMid" class="py-3 px-4 font-semibold hidden text-xs text-blue-400">MID</th>
-                                    <th id="colLast" class="py-3 px-4 font-semibold hidden text-xs text-blue-400">LAST</th>
-                                    <th id="colFamily" class="py-3 px-4 font-semibold hidden text-xs text-blue-400">FAMILY</th>
-                                    <th id="colReversedHex" class="py-3 px-4 font-semibold">Hexa Invertido</th>
-                                    <th class="py-3 px-4 font-bold text-white">Valor Real</th>
+                            <thead class="sticky top-0 z-10 bg-slate-900/90 backdrop-blur-md shadow-sm border-b border-white/10">
+                                <tr class="text-slate-300 text-xs tracking-wider uppercase">
+                                    <th class="py-4 px-5 font-semibold">Lido</th>
+                                    <th class="py-4 px-5 font-semibold">Hexadecimal</th>
+                                    <th id="colFirst" class="py-4 px-5 font-semibold hidden text-slate-500">FRST</th>
+                                    <th id="colMid" class="py-4 px-5 font-semibold hidden text-slate-500">MID</th>
+                                    <th id="colLast" class="py-4 px-5 font-semibold hidden text-slate-500">LAST</th>
+                                    <th id="colFamily" class="py-4 px-5 font-semibold hidden text-slate-500">FMLY</th>
+                                    <th id="colReversedHex" class="py-4 px-5 font-semibold">Hexa Inv</th>
+                                    <th class="py-4 px-5 font-bold text-cyan-400 bg-cyan-900/10">Valor Real</th>
                                 </tr>
                             </thead>
                             <tbody id="resultsTableBody">
@@ -177,8 +181,15 @@
                     </div>
                     
                     <!-- Rodapé com contagem -->
-                    <div id="resultsFooter" class="bg-blue-950/50 p-3 text-xs text-blue-300 text-right border-t border-blue-800 hidden relative z-20">
-                        A mostrar <span id="resultsCount" class="font-bold text-white">0</span> registo(s) convertido(s).
+                    <div id="resultsFooter" class="bg-black/20 p-4 text-xs text-slate-400 flex justify-between items-center border-t border-white/10 hidden relative z-20">
+                        <span class="flex items-center gap-2">
+                            <span class="relative flex h-2 w-2">
+                              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                              <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                            </span>
+                            Processamento Ativo
+                        </span>
+                        <span>Total Convertido: <span id="resultsCount" class="font-bold text-white bg-white/10 px-2 py-1 rounded-md ml-1">0</span></span>
                     </div>
                 </div>
             </div>
@@ -188,18 +199,13 @@
 
     <!-- Lógica JavaScript (Vanilla) -->
     <script>
-        // Elementos do DOM
         const ruleSelect = document.getElementById('ruleSelect');
         const ruleDescription = document.getElementById('ruleDescription');
         const inputText = document.getElementById('inputText');
         const linesCount = document.getElementById('linesCount');
         const clearBtn = document.getElementById('clearBtn');
-        
-        // Elementos de importação de ficheiros
         const importBtn = document.getElementById('importBtn');
         const fileInput = document.getElementById('fileInput');
-
-        // Botões de Ação
         const actionsContainer = document.getElementById('actionsContainer');
         const copyDecimalBtn = document.getElementById('copyDecimalBtn');
         const copyDecimalIcon = document.getElementById('copyDecimalIcon');
@@ -208,8 +214,6 @@
         const copyIcon = document.getElementById('copyIcon');
         const copyText = document.getElementById('copyText');
         const exportBtn = document.getElementById('exportBtn');
-        
-        // Elementos de Tabela
         const emptyState = document.getElementById('emptyState');
         const tableContainer = document.getElementById('tableContainer');
         const resultsTable = document.getElementById('resultsTable');
@@ -219,52 +223,31 @@
         const colLast = document.getElementById('colLast');
         const colFamily = document.getElementById('colFamily');
         const colReversedHex = document.getElementById('colReversedHex');
-        
         const resultsFooter = document.getElementById('resultsFooter');
         const resultsCount = document.getElementById('resultsCount');
 
-        // Ícones SVG
         const iconCopy = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>`;
         const iconCheck = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`;
 
-        // Estado Global
         let currentResults = [];
         let previousLines = 0;
 
-        // Regras de conversão
         const conversionRules = {
             femsa: {
                 description: 'Lê Decimal -> Converte para Hexa -> Inverte a ordem dos pares de bytes -> Converte para Decimal.',
                 process: (val) => {
                     const cleanVal = val.trim();
                     if (!cleanVal) return null;
-                    
                     let num = parseInt(cleanVal, 10);
                     if (isNaN(num)) return { original: cleanVal, hex: 'Erro', first: '-', mid: '-', last: '-', family: '-', reversedHex: 'Erro', final: 'Inválido' };
-
                     let hex = num.toString(16).toUpperCase().padStart(8, '0');
                     if (hex.length % 2 !== 0) hex = '0' + hex;
-
                     let pairs = [];
-                    for (let i = 0; i < hex.length; i += 2) {
-                        pairs.push(hex.substring(i, i + 2));
-                    }
-                    
+                    for (let i = 0; i < hex.length; i += 2) pairs.push(hex.substring(i, i + 2));
                     while(pairs.length < 4) pairs.unshift('00');
-
                     let reversedHex = [...pairs].reverse().join('');
                     let finalDec = parseInt(reversedHex, 16);
-
-                    return { 
-                        original: cleanVal, 
-                        hex: hex, 
-                        first: pairs[0],
-                        mid: pairs[1],
-                        last: pairs[2],
-                        family: pairs[3],
-                        reversedHex: reversedHex, 
-                        final: finalDec 
-                    };
+                    return { original: cleanVal, hex: hex, first: pairs[0], mid: pairs[1], last: pairs[2], family: pairs[3], reversedHex: reversedHex, final: finalDec };
                 }
             },
             normal26: {
@@ -272,32 +255,16 @@
                 process: (val) => {
                     const cleanVal = val.trim();
                     if (!cleanVal) return null;
-                    
                     let num = parseInt(cleanVal, 10);
                     if (isNaN(num)) return { original: cleanVal, hex: 'Erro', first: '-', mid: '-', last: '-', family: '-', reversedHex: '-', final: 'Inválido' };
-
                     let hex = num.toString(16).toUpperCase().padStart(8, '0');
                     if (hex.length % 2 !== 0) hex = '0' + hex;
-
                     let pairs = [];
-                    for (let i = 0; i < hex.length; i += 2) {
-                        pairs.push(hex.substring(i, i + 2));
-                    }
+                    for (let i = 0; i < hex.length; i += 2) pairs.push(hex.substring(i, i + 2));
                     while(pairs.length < 4) pairs.unshift('00');
-
                     let hexWithoutFirstByte = pairs[1] + pairs[2] + pairs[3];
                     let finalDec = parseInt(hexWithoutFirstByte, 16);
-
-                    return { 
-                        original: cleanVal, 
-                        hex: hex, 
-                        first: pairs[0],
-                        mid: pairs[1],
-                        last: pairs[2],
-                        family: pairs[3],
-                        reversedHex: '-', 
-                        final: finalDec 
-                    };
+                    return { original: cleanVal, hex: hex, first: pairs[0], mid: pairs[1], last: pairs[2], family: pairs[3], reversedHex: '-', final: finalDec };
                 }
             },
             hexToDec: {
@@ -305,47 +272,36 @@
                 process: (val) => {
                     const cleanVal = val.trim().replace(/[^0-9a-fA-F]/g, '');
                     if (!cleanVal) return null;
-
                     let finalDec = parseInt(cleanVal, 16);
                     if (isNaN(finalDec)) return { original: val, hex: 'Erro', reversedHex: '-', final: 'Inválido' };
-
                     return { original: val, hex: cleanVal.toUpperCase(), reversedHex: '-', final: finalDec };
                 }
             }
         };
 
-        // Função de Processamento
         function performConversion() {
             const ruleId = ruleSelect.value;
             const processFn = conversionRules[ruleId].process;
             const lines = inputText.value.split('\n');
-            
             currentResults = lines.map(line => processFn(line)).filter(res => res !== null);
             renderUI();
         }
 
-        // Event Listeners Básicos
         ruleSelect.addEventListener('change', (e) => {
-            const rule = e.target.value;
-            ruleDescription.textContent = conversionRules[rule].description;
+            ruleDescription.textContent = conversionRules[e.target.value].description;
             performConversion();
         });
 
-        // Este é o evento acionado ao colar ou ler com o leitor RFID
         inputText.addEventListener('input', (e) => {
             const text = e.target.value;
             const currentLines = text.split('\n').filter(l => l.trim()).length;
             linesCount.textContent = `${currentLines} linhas`;
-            
             performConversion();
 
-            // Desliza para o fundo Apenas se adicionou linhas novas
             if (currentLines > previousLines) {
                 setTimeout(() => {
                     inputText.scrollTop = inputText.scrollHeight;
-                    if (tableContainer) {
-                        tableContainer.scrollTop = tableContainer.scrollHeight;
-                    }
+                    if (tableContainer) tableContainer.scrollTop = tableContainer.scrollHeight;
                 }, 10);
             }
             previousLines = currentLines;
@@ -357,69 +313,47 @@
             currentResults = [];
             previousLines = 0;
             renderUI();
-            
             inputText.scrollTop = 0;
             if (tableContainer) tableContainer.scrollTop = 0;
         });
 
-        // Importação de Ficheiros
-        importBtn.addEventListener('click', () => {
-            fileInput.click();
-        });
+        importBtn.addEventListener('click', () => fileInput.click());
 
         fileInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (!file) return;
-
             const reader = new FileReader();
-            
             reader.onload = (evt) => {
                 try {
                     const data = new Uint8Array(evt.target.result);
                     const workbook = XLSX.read(data, { type: 'array' });
-                    
                     const firstSheetName = workbook.SheetNames[0];
                     const worksheet = workbook.Sheets[firstSheetName];
-                    
                     const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
                     
-                    let extractedValues = jsonData
-                        .map(row => row[0])
-                        .filter(val => val !== undefined && val !== null && String(val).trim() !== '');
-
+                    let extractedValues = jsonData.map(row => row[0]).filter(val => val !== undefined && val !== null && String(val).trim() !== '');
                     if (extractedValues.length > 0) {
                         const firstVal = String(extractedValues[0]).toLowerCase().trim();
-                        if (firstVal.includes('valor lido') || firstVal === 'a' || firstVal.includes('hexa')) {
-                            extractedValues.shift(); 
-                        }
+                        if (firstVal.includes('valor lido') || firstVal === 'a' || firstVal.includes('hexa')) extractedValues.shift(); 
                     }
 
                     const newText = extractedValues.join('\n');
-                    
-                    if (inputText.value.trim() !== '') {
-                        inputText.value += '\n' + newText;
-                    } else {
-                        inputText.value = newText;
-                    }
+                    if (inputText.value.trim() !== '') inputText.value += '\n' + newText;
+                    else inputText.value = newText;
                     
                     inputText.dispatchEvent(new Event('input'));
                     fileInput.value = '';
-                    
                 } catch (error) {
                     console.error("Erro ao processar a planilha:", error);
                     alert("Ocorreu um erro ao ler a folha de cálculo. Verifique se o formato é válido.");
                 }
             };
-            
             reader.readAsArrayBuffer(file);
         });
 
-        // Copiar Apenas o Valor Decimal (Última Coluna)
         copyDecimalBtn.addEventListener('click', () => {
             if (currentResults.length === 0) return;
-            
             const textToCopy = currentResults.map(r => r.final).join('\n');
-            
             const textarea = document.createElement("textarea");
             textarea.value = textToCopy;
             document.body.appendChild(textarea);
@@ -432,18 +366,13 @@
                     copyDecimalIcon.innerHTML = iconCopy;
                     copyDecimalText.textContent = 'Copiar Decimal';
                 }, 2000);
-            } catch (err) {
-                console.error('Falha ao copiar:', err);
-            }
+            } catch (err) {}
             document.body.removeChild(textarea);
         });
 
-        // Copiar Tudo
         copyBtn.addEventListener('click', () => {
             if (currentResults.length === 0) return;
-            
             const textToCopy = currentResults.map(r => `${r.original}\t${r.final}`).join('\n');
-            
             const textarea = document.createElement("textarea");
             textarea.value = textToCopy;
             document.body.appendChild(textarea);
@@ -456,60 +385,39 @@
                     copyIcon.innerHTML = iconCopy;
                     copyText.textContent = 'Copiar Tudo';
                 }, 2000);
-            } catch (err) {
-                console.error('Falha ao copiar:', err);
-            }
+            } catch (err) {}
             document.body.removeChild(textarea);
         });
 
-        // Exportar CSV
         exportBtn.addEventListener('click', () => {
             if (currentResults.length === 0) return;
-
             const is26Bits = ruleSelect.value === 'femsa' || ruleSelect.value === 'normal26';
             const headers = ['Valor Lido', 'Hexadecimal'];
-            
-            if (is26Bits) {
-                headers.push('FIRST', 'MID', 'LAST', 'FAMILY');
-            }
-            
-            if (ruleSelect.value !== 'normal26') {
-                headers.push('Hexa Invertido');
-            }
-            
+            if (is26Bits) headers.push('FIRST', 'MID', 'LAST', 'FAMILY');
+            if (ruleSelect.value !== 'normal26') headers.push('Hexa Invertido');
             headers.push('Valor Real');
 
-            const csvRows = [];
-            csvRows.push(headers.join(','));
-
+            const csvRows = [headers.join(',')];
             currentResults.forEach(r => {
                 let row = `${r.original},${r.hex}`;
-                if (is26Bits) {
-                    row += `,${r.first},${r.mid},${r.last},${r.family}`;
-                }
-                if (ruleSelect.value !== 'normal26') {
-                    row += `,${r.reversedHex}`;
-                }
+                if (is26Bits) row += `,${r.first},${r.mid},${r.last},${r.family}`;
+                if (ruleSelect.value !== 'normal26') row += `,${r.reversedHex}`;
                 row += `,${r.final}`;
                 csvRows.push(row);
             });
 
-            const csvContent = csvRows.join('\n');
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
-            
-            link.setAttribute('href', url);
-            link.setAttribute('download', 'cartoes_convertidos.csv');
+            link.href = url;
+            link.download = 'cartoes_convertidos.csv';
             link.style.display = 'none';
-            
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
             URL.revokeObjectURL(url);
         });
 
-        // UI Renderização
         function renderUI() {
             if (currentResults.length === 0) {
                 emptyState.classList.remove('hidden');
@@ -535,39 +443,24 @@
             colLast.style.display = is26Bits ? 'table-cell' : 'none';
             colFamily.style.display = is26Bits ? 'table-cell' : 'none';
 
-            resultsTableBody.innerHTML = '';
-
-            currentResults.forEach(item => {
-                const tr = document.createElement('tr');
-                tr.className = 'hover:bg-blue-800/40 border-b border-blue-800/50 last:border-0 transition-colors';
-                
-                let html = `
-                    <td class="py-2.5 px-4 font-mono text-blue-100">${item.original}</td>
-                    <td class="py-2.5 px-4 font-mono text-blue-300">${item.hex}</td>
-                `;
+            resultsTableBody.innerHTML = currentResults.map(item => {
+                let html = `<tr class="hover:bg-white/5 border-b border-white/5 last:border-0 transition-colors">
+                    <td class="py-3 px-5 font-mono text-slate-300">${item.original}</td>
+                    <td class="py-3 px-5 font-mono text-blue-300">${item.hex}</td>`;
 
                 if (is26Bits) {
                     html += `
-                        <td class="py-2.5 px-4 font-mono text-blue-400 text-xs">${item.first}</td>
-                        <td class="py-2.5 px-4 font-mono text-blue-400 text-xs">${item.mid}</td>
-                        <td class="py-2.5 px-4 font-mono text-blue-400 text-xs">${item.last}</td>
-                        <td class="py-2.5 px-4 font-mono text-blue-400 text-xs">${item.family}</td>
-                    `;
+                        <td class="py-3 px-5 font-mono text-slate-500 text-xs">${item.first}</td>
+                        <td class="py-3 px-5 font-mono text-slate-500 text-xs">${item.mid}</td>
+                        <td class="py-3 px-5 font-mono text-slate-500 text-xs">${item.last}</td>
+                        <td class="py-3 px-5 font-mono text-slate-500 text-xs">${item.family}</td>`;
                 }
-
                 if (showReversed) {
-                    html += `<td class="py-2.5 px-4 font-mono text-blue-300">${item.reversedHex}</td>`;
+                    html += `<td class="py-3 px-5 font-mono text-slate-400">${item.reversedHex}</td>`;
                 }
-
-                html += `
-                    <td class="py-2.5 px-4 font-mono font-bold text-white bg-blue-800/60">
-                        ${item.final}
-                    </td>
-                `;
-
-                tr.innerHTML = html;
-                resultsTableBody.appendChild(tr);
-            });
+                html += `<td class="py-3 px-5 font-mono font-bold text-cyan-300 bg-cyan-900/10">${item.final}</td></tr>`;
+                return html;
+            }).join('');
         }
     </script>
 </body>
