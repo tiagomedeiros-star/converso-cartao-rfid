@@ -10,9 +10,14 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        /* Importando as novas fontes premium do Google Fonts */
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@300;400;500;600;700;800&display=swap');
         
-        body { font-family: 'Inter', sans-serif; }
+        /* Aplicando a fonte principal */
+        body { font-family: 'Outfit', sans-serif; }
+        
+        /* Aplicando a fonte de dados/código para os números */
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
         
         /* Ajustes para animações suaves */
         .transition-all { transition-property: all; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 300ms; }
@@ -49,13 +54,13 @@
                 </div>
                 <div>
                     <h1 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-400 tracking-tight">Conversor RFID</h1>
-                    <p class="text-slate-400 text-sm mt-0.5 font-medium">Conversão dinâmica de cartões e importação em lote.</p>
+                    <p class="text-slate-400 text-sm mt-0.5 font-medium tracking-wide">Conversão dinâmica de cartões e importação em lote.</p>
                 </div>
             </div>
             
             <!-- Ações Globais Header -->
             <div class="flex gap-3 w-full md:w-auto">
-                <button id="importBtn" class="flex-1 md:flex-none items-center justify-center gap-2 text-sm font-semibold bg-white/5 hover:bg-white/10 border border-white/10 text-white py-2.5 px-4 rounded-xl transition-all flex shadow-sm">
+                <button id="importBtn" class="flex-1 md:flex-none items-center justify-center gap-2 text-sm font-semibold bg-white/5 hover:bg-white/10 border border-white/10 text-white py-2.5 px-4 rounded-xl transition-all flex shadow-sm tracking-wide">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
                     Importar Ficheiro
                 </button>
@@ -75,9 +80,9 @@
                     
                     <div class="space-y-5 flex-1 flex flex-col">
                         <div>
-                            <label class="block text-sm font-medium text-slate-300 mb-2">Regra do Cliente</label>
+                            <label class="block text-sm font-medium text-slate-300 mb-2 tracking-wide">Regra do Cliente</label>
                             <div class="relative">
-                                <select id="ruleSelect" class="w-full appearance-none border border-white/10 rounded-xl p-3.5 bg-black/20 text-white focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 outline-none transition-all shadow-inner hover:bg-black/30 cursor-pointer">
+                                <select id="ruleSelect" class="w-full appearance-none border border-white/10 rounded-xl p-3.5 bg-black/20 text-white focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 outline-none transition-all shadow-inner hover:bg-black/30 cursor-pointer font-medium tracking-wide">
                                     <option value="femsa">26 Bits (Invertido - Ex: TW, Femsa)</option>
                                     <option value="normal26">26 Bits (Padrão - Demais Clientes)</option>
                                     <option value="hexToDec">32 Bits (Hexa Direto - Ex: Ultragaz)</option>
@@ -86,15 +91,15 @@
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                                 </div>
                             </div>
-                            <p id="ruleDescription" class="text-xs text-slate-400 mt-3 bg-black/10 border border-white/5 p-3 rounded-lg leading-relaxed">
+                            <p id="ruleDescription" class="text-xs text-slate-400 mt-3 bg-black/10 border border-white/5 p-3 rounded-lg leading-relaxed tracking-wide">
                                 Lê Decimal -> Converte para Hexa -> Inverte a ordem dos pares de bytes -> Converte para Decimal.
                             </p>
                         </div>
 
                         <div class="flex-1 flex flex-col pt-2">
                             <div class="flex justify-between items-end mb-2">
-                                <label class="block text-sm font-medium text-slate-300">Data Input Stream</label>
-                                <span class="text-cyan-100 bg-cyan-500/20 border border-cyan-500/30 px-2.5 py-0.5 rounded-full text-xs font-bold tracking-wide" id="linesCount">
+                                <label class="block text-sm font-medium text-slate-300 tracking-wide">Data Input Stream</label>
+                                <span class="text-cyan-100 bg-cyan-500/20 border border-cyan-500/30 px-2.5 py-0.5 rounded-full text-xs font-bold tracking-wider" id="linesCount">
                                     0 linhas
                                 </span>
                             </div>
@@ -108,7 +113,7 @@
                         <div class="pt-2">
                             <button 
                                 id="clearBtn"
-                                class="w-full bg-red-500/10 border border-red-500/20 hover:bg-red-500 hover:text-white text-red-400 font-semibold py-3 px-4 rounded-xl transition-all flex justify-center items-center gap-2 shadow-sm"
+                                class="w-full bg-red-500/10 border border-red-500/20 hover:bg-red-500 hover:text-white text-red-400 font-bold py-3 px-4 rounded-xl transition-all flex justify-center items-center gap-2 shadow-sm tracking-wide"
                                 title="Limpar tudo"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
@@ -132,21 +137,21 @@
                         <div id="actionsContainer" class="flex flex-wrap gap-2 hidden w-full sm:w-auto">
                             <button 
                                 id="copyDecimalBtn"
-                                class="flex-1 sm:flex-none items-center justify-center gap-2 text-sm font-bold bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white py-2 px-4 rounded-xl transition-all shadow-lg shadow-blue-500/25 flex"
+                                class="flex-1 sm:flex-none items-center justify-center gap-2 text-sm font-bold bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white py-2 px-4 rounded-xl transition-all shadow-lg shadow-blue-500/25 flex tracking-wide"
                             >
                                 <span id="copyDecimalIcon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg></span>
                                 <span id="copyDecimalText">Copiar Decimal</span>
                             </button>
                             <button 
                                 id="copyBtn"
-                                class="flex-1 sm:flex-none items-center justify-center gap-2 text-sm font-medium bg-white/10 hover:bg-white/20 border border-white/10 text-white py-2 px-4 rounded-xl transition-all flex"
+                                class="flex-1 sm:flex-none items-center justify-center gap-2 text-sm font-semibold bg-white/10 hover:bg-white/20 border border-white/10 text-white py-2 px-4 rounded-xl transition-all flex tracking-wide"
                             >
                                 <span id="copyIcon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg></span>
                                 <span id="copyText">Copiar Tudo</span>
                             </button>
                             <button 
                                 id="exportBtn"
-                                class="flex-1 sm:flex-none items-center justify-center gap-2 text-sm font-medium bg-white/10 hover:bg-white/20 border border-white/10 text-white py-2 px-4 rounded-xl transition-all flex"
+                                class="flex-1 sm:flex-none items-center justify-center gap-2 text-sm font-semibold bg-white/10 hover:bg-white/20 border border-white/10 text-white py-2 px-4 rounded-xl transition-all flex tracking-wide"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
                                 Exportar CSV
@@ -161,22 +166,22 @@
                             <div class="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="opacity-60"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M8 13h2"/><path d="M8 17h2"/><path d="M14 13h2"/><path d="M14 17h2"/></svg>
                             </div>
-                            <p class="text-slate-300 font-medium">Nenhum registo processado.</p>
-                            <p class="text-sm mt-1 max-w-xs">Cole números ou importe uma planilha para ver a conversão em tempo real.</p>
+                            <p class="text-slate-300 font-semibold tracking-wide">Nenhum registo processado.</p>
+                            <p class="text-sm mt-1 max-w-xs tracking-wide">Cole números ou importe uma planilha para ver a conversão em tempo real.</p>
                         </div>
 
                         <!-- Tabela de Resultados -->
                         <table id="resultsTable" class="w-full text-left border-collapse text-sm hidden relative">
                             <!-- Cabeçalho Fixo (Sticky) -->
                             <thead class="sticky top-0 z-10 bg-slate-900/90 backdrop-blur-md shadow-sm border-b border-white/10">
-                                <tr class="text-slate-300 text-xs tracking-wider uppercase">
-                                    <th class="py-4 px-5 font-semibold">Lido</th>
-                                    <th class="py-4 px-5 font-semibold">Hexadecimal</th>
-                                    <th id="colFirst" class="py-4 px-5 font-semibold hidden text-slate-500">FRST</th>
-                                    <th id="colMid" class="py-4 px-5 font-semibold hidden text-slate-500">MID</th>
-                                    <th id="colLast" class="py-4 px-5 font-semibold hidden text-slate-500">LAST</th>
-                                    <th id="colFamily" class="py-4 px-5 font-semibold hidden text-slate-500">FMLY</th>
-                                    <th id="colReversedHex" class="py-4 px-5 font-semibold">Hexa Inv</th>
+                                <tr class="text-slate-300 text-xs tracking-widest uppercase font-semibold">
+                                    <th class="py-4 px-5">Lido</th>
+                                    <th class="py-4 px-5">Hexadecimal</th>
+                                    <th id="colFirst" class="py-4 px-5 hidden text-slate-500">FRST</th>
+                                    <th id="colMid" class="py-4 px-5 hidden text-slate-500">MID</th>
+                                    <th id="colLast" class="py-4 px-5 hidden text-slate-500">LAST</th>
+                                    <th id="colFamily" class="py-4 px-5 hidden text-slate-500">FMLY</th>
+                                    <th id="colReversedHex" class="py-4 px-5">Hexa Inv</th>
                                     <th class="py-4 px-5 font-bold text-cyan-400 bg-cyan-900/10">Valor Real</th>
                                 </tr>
                             </thead>
@@ -187,7 +192,7 @@
                     </div>
                     
                     <!-- Rodapé com contagem -->
-                    <div id="resultsFooter" class="bg-black/20 p-4 text-xs text-slate-400 flex justify-between items-center border-t border-white/10 hidden relative z-20">
+                    <div id="resultsFooter" class="bg-black/20 p-4 text-xs text-slate-400 flex justify-between items-center border-t border-white/10 hidden relative z-20 font-medium tracking-wide">
                         <span class="flex items-center gap-2">
                             <span class="relative flex h-2 w-2">
                               <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -195,7 +200,7 @@
                             </span>
                             Processamento Ativo
                         </span>
-                        <span>Total Convertido: <span id="resultsCount" class="font-bold text-white bg-white/10 px-2 py-1 rounded-md ml-1">0</span></span>
+                        <span>Total Convertido: <span id="resultsCount" class="font-bold text-white bg-white/10 px-2 py-1 rounded-md ml-1 font-mono">0</span></span>
                     </div>
                 </div>
             </div>
@@ -451,8 +456,8 @@
 
             resultsTableBody.innerHTML = currentResults.map(item => {
                 let html = `<tr class="hover:bg-white/5 border-b border-white/5 last:border-0 transition-colors">
-                    <td class="py-3 px-5 font-mono text-slate-300">${item.original}</td>
-                    <td class="py-3 px-5 font-mono text-blue-300">${item.hex}</td>`;
+                    <td class="py-3 px-5 font-mono text-slate-300 tracking-wide">${item.original}</td>
+                    <td class="py-3 px-5 font-mono text-blue-300 tracking-wide">${item.hex}</td>`;
 
                 if (is26Bits) {
                     html += `
@@ -462,9 +467,9 @@
                         <td class="py-3 px-5 font-mono text-slate-500 text-xs">${item.family}</td>`;
                 }
                 if (showReversed) {
-                    html += `<td class="py-3 px-5 font-mono text-slate-400">${item.reversedHex}</td>`;
+                    html += `<td class="py-3 px-5 font-mono text-slate-400 tracking-wide">${item.reversedHex}</td>`;
                 }
-                html += `<td class="py-3 px-5 font-mono font-bold text-cyan-300 bg-cyan-900/10">${item.final}</td></tr>`;
+                html += `<td class="py-3 px-5 font-mono font-bold text-cyan-300 bg-cyan-900/10 tracking-widest text-base">${item.final}</td></tr>`;
                 return html;
             }).join('');
         }
