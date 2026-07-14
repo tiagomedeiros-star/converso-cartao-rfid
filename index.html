@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Conversor RFID Dinâmico</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- SheetJS para ler ficheiros Excel/CSV -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     
     <style>
@@ -19,11 +21,16 @@
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 </head>
-<body class="min-h-screen bg-slate-50 p-4 md:p-8 font-sans text-slate-800">
+<!-- Imagem de fundo puxada diretamente do seu GitHub -->
+<body class="min-h-screen font-sans text-slate-800 relative bg-cover bg-center bg-no-repeat bg-fixed" style="background-image: url('https://raw.githubusercontent.com/tiagomedeiros-star/converso-cartao-rfid/main/capa.jpg');">
 
-    <div class="max-w-6xl mx-auto space-y-6">
+    <!-- Camada de vidro fosco para a imagem não atrapalhar a leitura -->
+    <div class="absolute inset-0 bg-slate-100/85 backdrop-blur-[3px] z-0 pointer-events-none"></div>
+
+    <div class="relative z-10 p-4 md:p-8 max-w-6xl mx-auto space-y-6">
         
-        <header class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex items-center gap-4">
+        <!-- Cabeçalho -->
+        <header class="bg-white/95 rounded-2xl shadow-xl border border-slate-200 p-6 flex items-center gap-4">
             <div class="bg-blue-600 p-3 rounded-xl text-white">
                 <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M8 3H3v5"/><path d="M12 22v-8"/><path d="m21 3-6 6"/><path d="m3 3 6 6"/><path d="m21 21-6-6"/><path d="m3 21 6-6"/></svg>
             </div>
@@ -35,8 +42,9 @@
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             
+            <!-- Painel Esquerdo: Entradas -->
             <div class="md:col-span-1 space-y-4">
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+                <div class="bg-white/95 rounded-2xl shadow-xl border border-slate-200 p-5">
                     <h2 class="text-lg font-semibold flex items-center gap-2 mb-4">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-600"><path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/></svg>
                         Configuração
@@ -59,6 +67,7 @@
                             <div class="flex justify-between items-end mb-1">
                                 <label class="block text-sm font-medium text-slate-700">Valores Lidos</label>
                                 <div class="flex items-center gap-2">
+                                    <!-- Botão de Importar -->
                                     <button 
                                         id="importBtn"
                                         class="flex items-center gap-1.5 text-xs font-medium bg-slate-200 hover:bg-slate-300 text-slate-700 py-1 px-2.5 rounded transition-colors"
@@ -95,8 +104,9 @@
                 </div>
             </div>
 
+            <!-- Painel Direito: Resultados -->
             <div class="md:col-span-2">
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-0 overflow-hidden flex flex-col h-full">
+                <div class="bg-white/95 rounded-2xl shadow-xl border border-slate-200 p-0 overflow-hidden flex flex-col h-full">
                     
                     <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                         <h2 class="text-lg font-semibold flex items-center gap-2">
@@ -133,14 +143,18 @@
                         </div>
                     </div>
 
+                    <!-- Container da tabela com scroll interno e altura máxima limitados -->
                     <div id="tableContainer" class="overflow-auto flex-1 p-0 relative max-h-[600px]">
+                        <!-- Estado Vazio -->
                         <div id="emptyState" class="h-64 flex flex-col items-center justify-center text-slate-400 p-6 text-center">
                             <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mb-3 opacity-20"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M8 13h2"/><path d="M8 17h2"/><path d="M14 13h2"/><path d="M14 17h2"/></svg>
                             <p>Nenhum dado processado ainda.</p>
                             <p class="text-sm mt-1">Cole os números ou importe uma planilha, a conversão é automática.</p>
                         </div>
 
+                        <!-- Tabela de Resultados -->
                         <table id="resultsTable" class="w-full text-left border-collapse text-sm hidden relative">
+                            <!-- Cabeçalho Fixo (Sticky) -->
                             <thead class="sticky top-0 z-10 bg-slate-100 shadow-sm border-b border-slate-200">
                                 <tr class="text-slate-600">
                                     <th class="py-3 px-4 font-medium">Valor Lido</th>
@@ -154,10 +168,12 @@
                                 </tr>
                             </thead>
                             <tbody id="resultsTableBody">
-                                </tbody>
+                                <!-- As linhas serão geradas aqui via JS -->
+                            </tbody>
                         </table>
                     </div>
                     
+                    <!-- Rodapé com contagem -->
                     <div id="resultsFooter" class="bg-slate-50 p-3 text-xs text-slate-500 text-right border-t border-slate-200 hidden relative z-20">
                         A mostrar <span id="resultsCount">0</span> registo(s) convertido(s).
                     </div>
@@ -167,6 +183,7 @@
         </div>
     </div>
 
+    <!-- Lógica JavaScript (Vanilla) -->
     <script>
         // Elementos do DOM
         const ruleSelect = document.getElementById('ruleSelect');
@@ -523,7 +540,7 @@
 
             currentResults.forEach(item => {
                 const tr = document.createElement('tr');
-                tr.className = 'hover:bg-slate-50 border-b border-slate-100 last:border-0 transition-colors';
+                tr.className = 'hover:bg-slate-50/70 border-b border-slate-100 last:border-0 transition-colors';
                 
                 let html = `
                     <td class="py-2.5 px-4 font-mono text-slate-600">${item.original}</td>
@@ -544,7 +561,7 @@
                 }
 
                 html += `
-                    <td class="py-2.5 px-4 font-mono font-bold text-blue-700 bg-blue-50/30">
+                    <td class="py-2.5 px-4 font-mono font-bold text-blue-700 bg-blue-50/60">
                         ${item.final}
                     </td>
                 `;
