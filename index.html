@@ -181,7 +181,7 @@
                                     <th id="colMid" class="py-4 px-5 hidden text-slate-500">MID</th>
                                     <th id="colLast" class="py-4 px-5 hidden text-slate-500">LAST</th>
                                     <th id="colFamily" class="py-4 px-5 hidden text-slate-500">FMLY</th>
-                                    <th id="colReversedHex" class="py-4 px-5">Hexa Inv</th>
+                                    <th id="colReversedHex" class="py-4 px-5 hidden">Hexa Inv</th>
                                     <th class="py-4 px-5 font-bold text-cyan-400 bg-cyan-900/10">Valor Real</th>
                                 </tr>
                             </thead>
@@ -448,11 +448,12 @@
             const is26Bits = ruleSelect.value === 'femsa' || ruleSelect.value === 'normal26';
             const showReversed = currentResults[0].reversedHex !== '-';
             
-            colReversedHex.style.display = showReversed ? 'table-cell' : 'none';
-            colFirst.style.display = is26Bits ? 'table-cell' : 'none';
-            colMid.style.display = is26Bits ? 'table-cell' : 'none';
-            colLast.style.display = is26Bits ? 'table-cell' : 'none';
-            colFamily.style.display = is26Bits ? 'table-cell' : 'none';
+            // Correção: usar classList.toggle em vez de style.display para não conflitar com o !important do CSS
+            colReversedHex.classList.toggle('hidden', !showReversed);
+            colFirst.classList.toggle('hidden', !is26Bits);
+            colMid.classList.toggle('hidden', !is26Bits);
+            colLast.classList.toggle('hidden', !is26Bits);
+            colFamily.classList.toggle('hidden', !is26Bits);
 
             resultsTableBody.innerHTML = currentResults.map(item => {
                 let html = `<tr class="hover:bg-white/5 border-b border-white/5 last:border-0 transition-colors">
