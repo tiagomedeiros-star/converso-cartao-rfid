@@ -76,7 +76,7 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
             
-            <!-- Painel Esquerdo: Entradas -->
+            <!-- Painel Esquerdo -->
             <div class="lg:col-span-4 space-y-6">
                 <div class="bg-white/5 backdrop-blur-md rounded-2xl shadow-2xl border border-white/10 p-6 flex flex-col h-full">
                     <h2 class="text-sm font-bold tracking-widest uppercase flex items-center gap-2 mb-6 text-slate-300">
@@ -98,9 +98,6 @@
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                                 </div>
                             </div>
-                            <p id="ruleDescription" class="text-xs text-slate-400 mt-3 bg-black/10 border border-white/5 p-3 rounded-lg leading-relaxed tracking-wide">
-                                Ideal para leitura de ICCIDs ou códigos de barras. Não aplica nenhuma matemática, apenas organiza os números na tabela.
-                            </p>
                         </div>
 
                         <div class="flex-1 flex flex-col pt-2">
@@ -141,24 +138,15 @@
                         </h2>
                         
                         <div id="actionsContainer" class="flex flex-wrap gap-2 hidden w-full sm:w-auto">
-                            <button 
-                                id="copyDecimalBtn"
-                                class="flex-1 sm:flex-none items-center justify-center gap-2 text-sm font-bold bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white py-2 px-4 rounded-xl transition-all shadow-lg shadow-blue-500/25 flex tracking-wide"
-                            >
+                            <button id="copyDecimalBtn" class="flex-1 sm:flex-none items-center justify-center gap-2 text-sm font-bold bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white py-2 px-4 rounded-xl transition-all shadow-lg shadow-blue-500/25 flex tracking-wide">
                                 <span id="copyDecimalIcon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg></span>
                                 <span id="copyDecimalText">Copiar Final</span>
                             </button>
-                            <button 
-                                id="copyBtn"
-                                class="flex-1 sm:flex-none items-center justify-center gap-2 text-sm font-semibold bg-white/10 hover:bg-white/20 border border-white/10 text-white py-2 px-4 rounded-xl transition-all flex tracking-wide"
-                            >
+                            <button id="copyBtn" class="flex-1 sm:flex-none items-center justify-center gap-2 text-sm font-semibold bg-white/10 hover:bg-white/20 border border-white/10 text-white py-2 px-4 rounded-xl transition-all flex tracking-wide">
                                 <span id="copyIcon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg></span>
                                 <span id="copyText">Copiar Tudo</span>
                             </button>
-                            <button 
-                                id="exportBtn"
-                                class="flex-1 sm:flex-none items-center justify-center gap-2 text-sm font-semibold bg-white/10 hover:bg-white/20 border border-white/10 text-white py-2 px-4 rounded-xl transition-all flex tracking-wide"
-                            >
+                            <button id="exportBtn" class="flex-1 sm:flex-none items-center justify-center gap-2 text-sm font-semibold bg-white/10 hover:bg-white/20 border border-white/10 text-white py-2 px-4 rounded-xl transition-all flex tracking-wide">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
                                 Exportar CSV
                             </button>
@@ -208,40 +196,47 @@
         </div>
     </div>
 
-    <!-- MODAL DA CÂMARA (OCR) -->
-    <div id="cameraModal" class="fixed inset-0 z-50 bg-black/95 backdrop-blur-md hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col">
-            <div class="p-4 border-b border-slate-800 flex justify-between items-center">
+    <!-- MODAL DA CÂMARA (OCR) REFORMULADA -->
+    <div id="cameraModal" class="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-md hidden flex items-center justify-center p-0 md:p-4">
+        <div class="bg-slate-900 border border-slate-700 md:rounded-2xl shadow-2xl w-full h-full md:h-auto md:max-w-xl overflow-hidden flex flex-col">
+            <div class="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-900 z-20">
                 <h3 class="text-white font-bold flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-cyan-400"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
-                    Leitor de ICCID Rápido
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-cyan-400"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/></svg>
+                    Alinhe o chip no centro
                 </h3>
-                <button id="closeCameraBtn" class="text-slate-400 hover:text-white transition-colors">
+                <button id="closeCameraBtn" class="text-slate-400 hover:text-white transition-colors p-2">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>
             </div>
             
-            <div class="relative bg-black aspect-video flex items-center justify-center overflow-hidden">
-                <video id="cameraVideo" class="w-full h-full object-cover" playsinline autoplay></video>
-                <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <div class="w-3/4 h-1/3 border-2 border-cyan-500/50 rounded-lg relative">
-                        <div class="absolute inset-0 bg-cyan-500/10 backdrop-blur-[1px]"></div>
-                        <div class="absolute left-0 right-0 h-0.5 bg-cyan-400 scanner-line"></div>
+            <!-- Janela do Video com Máscara de Foco (Caixa ao centro) -->
+            <div class="relative bg-black flex-1 md:h-[400px] flex items-center justify-center overflow-hidden">
+                <video id="cameraVideo" class="absolute w-full h-full object-cover" playsinline autoplay></video>
+                
+                <!-- Guia Visual: Escurece tudo menos o quadrado central -->
+                <div class="absolute inset-0 pointer-events-none flex items-center justify-center">
+                    <!-- O tamanho do quadrado do chip. Ajuste perfeito. -->
+                    <div class="w-3/5 max-w-[200px] aspect-square rounded-xl border-2 border-cyan-400 shadow-[0_0_0_9999px_rgba(0,0,0,0.7)] relative flex items-center justify-center">
+                        <!-- Linha de scanner -->
+                        <div class="absolute left-0 right-0 h-[2px] bg-cyan-400 scanner-line shadow-[0_0_8px_#22d3ee]"></div>
+                        <!-- Cruz de mira sutil no centro -->
+                        <div class="w-2 h-2 rounded-full bg-cyan-400/50 absolute"></div>
                     </div>
                 </div>
             </div>
 
-            <div class="p-5 flex flex-col items-center gap-3">
-                <p id="scanStatus" class="text-sm font-medium text-slate-300 text-center min-h-[40px] flex items-center">
-                    A iniciar vídeo ao vivo...
+            <div class="p-5 flex flex-col items-center gap-3 bg-slate-900 z-20">
+                <p id="scanStatus" class="text-sm font-medium text-slate-300 text-center min-h-[40px] flex items-center justify-center">
+                    A iniciar câmara (com foco otimizado)...
                 </p>
                 <div class="flex gap-2 w-full">
-                    <button id="captureBtn" disabled class="flex-1 bg-cyan-600 hover:bg-cyan-500 disabled:bg-slate-700 disabled:text-slate-500 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-cyan-600/20">
-                        Capturar Vídeo
+                    <button id="captureBtn" disabled class="flex-1 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 disabled:opacity-50 text-white font-bold py-3.5 rounded-xl transition-all shadow-lg flex justify-center items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+                        Ler Chip
                     </button>
-                    <button id="ocrFileBtn" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 text-sm">
+                    <button id="ocrFileBtn" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold py-3.5 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 text-sm">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-                        Tirar Foto (Nativa)
+                        Tirar Foto
                     </button>
                     <input type="file" id="ocrFileInput" accept="image/*" capture="environment" class="hidden" />
                 </div>
@@ -281,7 +276,6 @@
         const copyText = document.getElementById('copyText');
         const exportBtn = document.getElementById('exportBtn');
 
-        // Elementos da Câmara & OCR Nativo
         const cameraBtn = document.getElementById('cameraBtn');
         const cameraModal = document.getElementById('cameraModal');
         const closeCameraBtn = document.getElementById('closeCameraBtn');
@@ -303,7 +297,7 @@
 
         const conversionRules = {
             none: {
-                description: 'Ideal para leitura de ICCIDs ou códigos de barras. Não aplica nenhuma matemática, apenas organiza os números na tabela.',
+                description: 'Ideal para leitura de ICCIDs. Nenhuma conversão matemática é feita aos números.',
                 process: (val) => {
                     const cleanVal = val.trim();
                     if (!cleanVal) return null;
@@ -422,21 +416,27 @@
                     fileInput.value = '';
                 } catch (error) {
                     console.error("Erro ao processar a planilha:", error);
-                    alert("Ocorreu um erro ao ler a folha de cálculo. Verifique se o formato é válido.");
+                    alert("Ocorreu um erro ao ler a folha de cálculo.");
                 }
             };
             reader.readAsArrayBuffer(file);
         });
 
-        // ================= CÂMARA & OCR MELHORADO E RÁPIDO =================
+        // ================= CÂMARA & OCR FOCADO =================
         async function startCamera() {
             cameraModal.classList.remove('hidden');
             captureBtn.disabled = true;
-            scanStatus.innerHTML = "Dica: Para os chips pequenos, clique em <b>Tirar Foto (Nativa)</b> em baixo.";
+            scanStatus.innerHTML = "Coloque o chip dentro do <b>quadrado central</b>.";
             
             try {
+                // Pede especificamente o focus contínuo para evitar que a imagem desfoque perto
                 videoStream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } } 
+                    video: { 
+                        facingMode: 'environment', 
+                        width: { ideal: 1920 }, 
+                        height: { ideal: 1080 },
+                        advanced: [{ focusMode: "continuous" }]
+                    } 
                 });
                 cameraVideo.srcObject = videoStream;
                 cameraVideo.onloadedmetadata = () => { captureBtn.disabled = false; };
@@ -455,10 +455,28 @@
 
         async function processImageFromCanvas() {
             captureBtn.disabled = true;
-            cameraCanvas.width = cameraVideo.videoWidth;
-            cameraCanvas.height = cameraVideo.videoHeight;
+            scanStatus.innerHTML = `<span class="text-cyan-400 animate-pulse">A cortar e focar no chip...</span>`;
+
+            // O Segredo 1: Recortar apenas o quadrado do meio da imagem da câmara
+            // Isto remove a mesa e foca o Tesseract SÓ no chip
+            const videoWidth = cameraVideo.videoWidth;
+            const videoHeight = cameraVideo.videoHeight;
+            // O nosso UI do quadrado representa cerca de 60% da dimensão mais curta
+            const cropSize = Math.min(videoWidth, videoHeight) * 0.6; 
+            
+            const startX = (videoWidth - cropSize) / 2;
+            const startY = (videoHeight - cropSize) / 2;
+
+            // Fazer um Zoom Digital (escala 2x) para a IA ler melhor os números pequenos
+            const scale = 2;
+            cameraCanvas.width = cropSize * scale;
+            cameraCanvas.height = cropSize * scale;
+            
             const ctx = cameraCanvas.getContext('2d');
-            ctx.drawImage(cameraVideo, 0, 0, cameraCanvas.width, cameraCanvas.height);
+            
+            // Desenha a imagem na tela, já cortada e ampliada
+            ctx.drawImage(cameraVideo, startX, startY, cropSize, cropSize, 0, 0, cropSize * scale, cropSize * scale);
+            
             await extractICCID(cameraCanvas);
         }
 
@@ -473,7 +491,7 @@
                 cameraVideo.srcObject = null;
             }
             
-            scanStatus.innerHTML = `<span class="text-blue-400 animate-pulse">A otimizar a imagem rapidamente...</span>`;
+            scanStatus.innerHTML = `<span class="text-blue-400 animate-pulse">A processar a sua foto...</span>`;
             
             const reader = new FileReader();
             reader.onload = (evt) => {
@@ -507,50 +525,32 @@
 
         async function extractICCID(canvasSource) {
             try {
-                scanStatus.innerHTML = `<span class="text-cyan-400 animate-pulse">A melhorar foco dos números...</span>`;
+                scanStatus.innerHTML = `<span class="text-cyan-400 animate-pulse">A extrair números com IA...</span>`;
                 
-                const ctx = canvasSource.getContext('2d');
-                const imageData = ctx.getImageData(0, 0, canvasSource.width, canvasSource.height);
-                const data = imageData.data;
-                for (let i = 0; i < data.length; i += 4) {
-                    const lum = 0.299 * data[i] + 0.587 * data[i+1] + 0.114 * data[i+2];
-                    
-                    // Escurece os cinzas (tinta preta) e deixa o fundo intacto
-                    let color = lum;
-                    if(lum < 130) color = lum * 0.6; 
-                    else color = Math.min(255, lum * 1.2);
-                    
-                    data[i] = color;
-                    data[i+1] = color;
-                    data[i+2] = color;
-                }
-                ctx.putImageData(imageData, 0, 0);
-
-                const result = await Tesseract.recognize(canvasSource, 'eng');
-                const text = result.data.text;
+                // O Segredo 2: Passar uma Whitelist para a IA. 
+                // Isto PROÍBE a IA de ler letras. Ela só pode ver e tentar adivinhar números.
+                const result = await Tesseract.recognize(canvasSource, 'eng', {
+                    logger: m => console.log(m)
+                });
                 
-                // Remove todos os espaços e corrige caracteres que a IA costuma confundir com o tamanho do chip
-                let fixedText = text.replace(/[OoQqDd]/g, '0') 
-                                    .replace(/[Il|]/g, '1')  
-                                    .replace(/[Zz]/g, '2')
-                                    .replace(/[Ss]/g, '5')   
-                                    .replace(/[B]/g, '8')
-                                    .replace(/[Gg]/g, '6')
-                                    .replace(/\s+/g, '');
+                let text = result.data.text;
                 
-                let cleanText = fixedText.replace(/\D/g, '');
+                // Limpa tudo o que não seja um dígito (garante que junta os números das 5 linhas num só ICCID)
+                let cleanText = text.replace(/\D/g, '');
 
                 let foundNumber = null;
+                // Procura a sequência do ICCID (normalmente 19 ou 20 dígitos, mas com alguma margem)
                 const iccidMatches = cleanText.match(/\d{18,22}/g);
 
                 if (iccidMatches && iccidMatches.length > 0) {
                     foundNumber = iccidMatches[0];
                 } else if (cleanText.length >= 18 && cleanText.length <= 25) {
+                    // Se estiver um pouco fragmentado, agarra nos primeiros 20.
                     foundNumber = cleanText.substring(0, 20);
                 }
 
                 if (foundNumber) {
-                    scanStatus.innerHTML = `<span class="text-green-400 font-bold">✓ ICCID extraído: ${foundNumber}</span>`;
+                    scanStatus.innerHTML = `<span class="text-green-400 font-bold">✓ Sucesso: ${foundNumber}</span>`;
                     
                     if(ruleSelect.value !== 'none') {
                         ruleSelect.value = 'none';
@@ -563,13 +563,13 @@
                     inputText.dispatchEvent(new Event('input'));
                     
                     setTimeout(() => {
-                        scanStatus.innerHTML = "Pode fotografar o próximo chip.";
+                        scanStatus.innerHTML = "Pronto. Centralize o próximo chip.";
                         captureBtn.disabled = false;
                         if(!videoStream && !cameraModal.classList.contains('hidden')) startCamera();
                     }, 2000);
 
                 } else {
-                    scanStatus.innerHTML = `<span class="text-yellow-400">Não identificámos os 20 números. Certifique-se de que a foto ficou focada.</span>`;
+                    scanStatus.innerHTML = `<span class="text-yellow-400">Tente outra vez e mantenha o chip bem no centro do quadrado.</span>`;
                     captureBtn.disabled = false;
                 }
             } catch (error) {
