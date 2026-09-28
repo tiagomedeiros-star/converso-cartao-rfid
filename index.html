@@ -403,7 +403,7 @@
             reader.readAsArrayBuffer(file);
         });
 
-        // ================= DITADO POR VOZ (WEB SPEECH API) MELHORADO =================
+        // ================= DITADO POR VOZ (WEB SPEECH API) =================
         const openVoiceBtn = document.getElementById('openVoiceBtn');
         const voiceModal = document.getElementById('voiceModal');
         const closeVoiceBtn = document.getElementById('closeVoiceBtn');
@@ -416,7 +416,9 @@
         const voiceStatus = document.getElementById('voiceStatus');
         const voiceAlertBox = document.getElementById('voiceAlertBox');
 
-        let accumulatedVoiceNumbers = "";
+        // Duas memórias para evitar que o telemóvel duplique números
+        let globalAccumulated = "";
+        let sessionAccumulated = "";
         let isRecording = false;
         
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -424,7 +426,7 @@
 
         if (SpeechRecognition) {
             recognition = new SpeechRecognition();
-            recognition.lang = 'pt-PT'; // Ajustado para Português de Portugal
+            recognition.lang = 'pt-PT'; // Entende PT
             recognition.continuous = true;
             recognition.interimResults = true;
 
@@ -442,24 +444,27 @@
             }
 
             recognition.onresult = (event) => {
-                let interimTranscript = '';
-                let finalTranscript = '';
+                let currentSessionFinal = '';
+                let currentInterim = '';
 
-                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                // Reconstrói sempre a frase atual desde o índice 0 da sessão
+                for (let i = 0; i < event.results.length; ++i) {
                     if (event.results[i].isFinal) {
-                        finalTranscript += event.results[i][0].transcript;
+                        currentSessionFinal += event.results[i][0].transcript + ' ';
                     } else {
-                        interimTranscript += event.results[i][0].transcript;
+                        currentInterim += event.results[i][0].transcript;
                     }
                 }
 
-                if (finalTranscript) {
-                    accumulatedVoiceNumbers += processTranscript(finalTranscript);
-                    voiceResultText.textContent = accumulatedVoiceNumbers || "...";
+                sessionAccumulated = processTranscript(currentSessionFinal);
+                let totalText = globalAccumulated + sessionAccumulated;
+                
+                if (totalText) {
+                    voiceResultText.textContent = totalText;
                 }
 
-                if (interimTranscript) {
-                    voiceInterimText.textContent = processTranscript(interimTranscript);
+                if (currentInterim) {
+                    voiceInterimText.textContent = processTranscript(currentInterim);
                 } else {
                     voiceInterimText.textContent = "";
                 }
@@ -468,7 +473,7 @@
             recognition.onerror = (event) => {
                 let errorMsg = "Ocorreu um erro no microfone.";
                 if (event.error === 'not-allowed') {
-                    errorMsg = "O acesso ao microfone foi bloqueado pelo navegador. Certifique-se de que o site está alojado com HTTPS (ex: Vercel) e permita o microfone.";
+                    errorMsg = "Acesso bloqueado. O site tem de estar alojado com HTTPS (Vercel) e deve permitir o microfone.";
                 } else if (event.error === 'no-speech') {
                     errorMsg = "Nenhum som detetado. Fale um pouco mais alto.";
                 }
@@ -479,6 +484,10 @@
             };
 
             recognition.onend = () => {
+                // Guarda a sessão na memória definitiva ao pausar/reiniciar
+                globalAccumulated += sessionAccumulated;
+                sessionAccumulated = "";
+                
                 if (isRecording) {
                     try { recognition.start(); } catch(e){}
                 }
@@ -489,13 +498,14 @@
             voiceAlertBox.classList.add('hidden');
             
             if(!recognition) {
-                voiceAlertBox.textContent = "O seu navegador não suporta Ditado por Voz ou o site não está num servidor seguro (HTTPS). Aloje o ficheiro no Vercel/GitHub para usar esta função.";
+                voiceAlertBox.textContent = "Navegador incompatível ou ligação não segura (HTTP). Use o Vercel para testar.";
                 voiceAlertBox.classList.remove('hidden');
                 return;
             }
 
-            accumulatedVoiceNumbers = "";
-            voiceResultText.textContent = "...";
+            // Não limpa o global, apenas retoma
+            sessionAccumulated = "";
+            if(!globalAccumulated) voiceResultText.textContent = "...";
             voiceInterimText.textContent = "";
             isRecording = true;
             
@@ -520,7 +530,7 @@
         openVoiceBtn.addEventListener('click', () => {
             voiceAlertBox.classList.add('hidden');
             voiceModal.classList.remove('hidden');
-            if(!accumulatedVoiceNumbers) voiceResultText.textContent = "...";
+            if(!globalAccumulated && !sessionAccumulated) voiceResultText.textContent = "...";
         });
 
         closeVoiceBtn.addEventListener('click', () => {
@@ -534,7 +544,8 @@
         });
 
         clearVoiceBtn.addEventListener('click', () => {
-            accumulatedVoiceNumbers = "";
+            globalAccumulated = "";
+            sessionAccumulated = "";
             voiceResultText.textContent = "...";
             voiceInterimText.textContent = "";
             if(!isRecording) voiceStatus.innerHTML = `Clique no botão vermelho para começar.`;
@@ -542,18 +553,22 @@
 
         insertVoiceBtn.addEventListener('click', () => {
             stopRecording();
-            if(accumulatedVoiceNumbers.length > 0) {
+            
+            let finalNumber = globalAccumulated + sessionAccumulated;
+            
+            if(finalNumber.length > 0) {
                 if(ruleSelect.value !== 'none') {
                     ruleSelect.value = 'none';
                     ruleSelect.dispatchEvent(new Event('change'));
                 }
 
-                if (inputText.value.trim() !== '') inputText.value += '\n' + accumulatedVoiceNumbers;
-                else inputText.value = accumulatedVoiceNumbers;
+                if (inputText.value.trim() !== '') inputText.value += '\n' + finalNumber;
+                else inputText.value = finalNumber;
                 
                 inputText.dispatchEvent(new Event('input'));
                 
-                accumulatedVoiceNumbers = ""; 
+                globalAccumulated = ""; 
+                sessionAccumulated = "";
                 voiceModal.classList.add('hidden');
             } else {
                 alert("Nenhum número detetado para inserir.");
