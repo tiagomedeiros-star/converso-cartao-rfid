@@ -8,8 +8,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- SheetJS para ler ficheiros Excel/CSV -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <!-- Tesseract.js para Reconhecimento Ótico (OCR) -->
-    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@300;400;500;600;700;800&display=swap');
@@ -27,14 +25,14 @@
 
         select option { background-color: #0f172a; color: #f8fafc; }
 
-        @keyframes scan {
-            0% { top: 0%; opacity: 0; }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
-            100% { top: 100%; opacity: 0; }
+        /* Animação do Microfone a gravar */
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+            100% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
         }
-        .scanner-line {
-            animation: scan 2s linear infinite;
+        .recording-pulse {
+            animation: pulse-ring 2s infinite;
         }
     </style>
 </head>
@@ -57,14 +55,14 @@
                 </div>
                 <div>
                     <h1 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-400 tracking-tight">Conversor RFID</h1>
-                    <p class="text-slate-400 text-sm mt-0.5 font-medium tracking-wide">Conversão dinâmica e Leitura Ótica de ICCID.</p>
+                    <p class="text-slate-400 text-sm mt-0.5 font-medium tracking-wide">Conversão dinâmica e Ditado Inteligente de ICCID.</p>
                 </div>
             </div>
             
             <div class="flex flex-wrap gap-3 w-full md:w-auto">
-                <button id="cameraBtn" class="flex-1 md:flex-none items-center justify-center gap-2 text-sm font-bold bg-cyan-600/20 hover:bg-cyan-500/40 border border-cyan-500/50 text-cyan-300 py-2.5 px-4 rounded-xl transition-all flex shadow-sm tracking-wide">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
-                    Ler com Câmara
+                <button id="openVoiceBtn" class="flex-1 md:flex-none items-center justify-center gap-2 text-sm font-bold bg-cyan-600/20 hover:bg-cyan-500/40 border border-cyan-500/50 text-cyan-300 py-2.5 px-4 rounded-xl transition-all flex shadow-sm tracking-wide">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
+                    Ditado por Voz
                 </button>
                 <button id="importBtn" class="flex-1 md:flex-none items-center justify-center gap-2 text-sm font-semibold bg-white/5 hover:bg-white/10 border border-white/10 text-white py-2.5 px-4 rounded-xl transition-all flex shadow-sm tracking-wide">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
@@ -109,7 +107,7 @@
                             </div>
                             <textarea 
                                 id="inputText"
-                                placeholder="Insira, cole ou escaneie os números aqui..."
+                                placeholder="Insira, cole ou dite os números aqui..."
                                 class="w-full flex-1 min-h-[250px] border border-white/10 rounded-xl p-4 bg-black/20 text-slate-100 focus:bg-black/40 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 outline-none font-mono text-sm resize-none transition-all placeholder-slate-600 shadow-inner"
                             ></textarea>
                         </div>
@@ -159,7 +157,7 @@
                                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="opacity-60"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M8 13h2"/><path d="M8 17h2"/><path d="M14 13h2"/><path d="M14 17h2"/></svg>
                             </div>
                             <p class="text-slate-300 font-semibold tracking-wide">Nenhum registo processado.</p>
-                            <p class="text-sm mt-1 max-w-xs tracking-wide">Cole números, importe uma planilha ou escaneie o ICCID para começar.</p>
+                            <p class="text-sm mt-1 max-w-xs tracking-wide">Cole números, importe uma planilha ou dite o ICCID em voz alta para começar.</p>
                         </div>
 
                         <table id="resultsTable" class="w-full text-left border-collapse text-sm hidden relative">
@@ -196,55 +194,49 @@
         </div>
     </div>
 
-    <!-- MODAL DA CÂMARA (OCR) REFORMULADA -->
-    <div id="cameraModal" class="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-md hidden flex items-center justify-center p-0 md:p-4">
-        <div class="bg-slate-900 border border-slate-700 md:rounded-2xl shadow-2xl w-full h-full md:h-auto md:max-w-xl overflow-hidden flex flex-col">
+    <!-- MODAL DE DITADO POR VOZ -->
+    <div id="voiceModal" class="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col">
             <div class="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-900 z-20">
                 <h3 class="text-white font-bold flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-cyan-400"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/></svg>
-                    Alinhe o chip no centro
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-cyan-400"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
+                    Ditado Inteligente
                 </h3>
-                <button id="closeCameraBtn" class="text-slate-400 hover:text-white transition-colors p-2">
+                <button id="closeVoiceBtn" class="text-slate-400 hover:text-white transition-colors p-2">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>
             </div>
             
-            <!-- Janela do Video com Máscara de Foco (Caixa ao centro) -->
-            <div class="relative bg-black flex-1 md:h-[400px] flex items-center justify-center overflow-hidden">
-                <video id="cameraVideo" class="absolute w-full h-full object-cover" playsinline autoplay></video>
+            <div class="p-6 bg-black/50 flex flex-col items-center justify-center gap-6">
                 
-                <!-- Guia Visual: Escurece tudo menos o quadrado central -->
-                <div class="absolute inset-0 pointer-events-none flex items-center justify-center">
-                    <!-- O tamanho do quadrado do chip. Ajuste perfeito. -->
-                    <div class="w-3/5 max-w-[200px] aspect-square rounded-xl border-2 border-cyan-400 shadow-[0_0_0_9999px_rgba(0,0,0,0.7)] relative flex items-center justify-center">
-                        <!-- Linha de scanner -->
-                        <div class="absolute left-0 right-0 h-[2px] bg-cyan-400 scanner-line shadow-[0_0_8px_#22d3ee]"></div>
-                        <!-- Cruz de mira sutil no centro -->
-                        <div class="w-2 h-2 rounded-full bg-cyan-400/50 absolute"></div>
-                    </div>
+                <!-- Visor dos números -->
+                <div class="w-full bg-slate-800 border border-slate-700 rounded-xl p-4 min-h-[120px] flex flex-col relative">
+                    <p class="text-xs text-slate-400 uppercase tracking-widest mb-2 font-bold">Números detetados:</p>
+                    <p id="voiceResultText" class="font-mono text-cyan-300 text-2xl break-all tracking-wider font-bold">...</p>
+                    <p id="voiceInterimText" class="font-mono text-slate-500 text-lg break-all italic mt-1"></p>
                 </div>
-            </div>
 
-            <div class="p-5 flex flex-col items-center gap-3 bg-slate-900 z-20">
-                <p id="scanStatus" class="text-sm font-medium text-slate-300 text-center min-h-[40px] flex items-center justify-center">
-                    A iniciar câmara (com foco otimizado)...
+                <p id="voiceStatus" class="text-sm font-medium text-slate-400 text-center">
+                    Clique no botão vermelho e leia os números do chip.
                 </p>
-                <div class="flex gap-2 w-full">
-                    <button id="captureBtn" disabled class="flex-1 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 disabled:opacity-50 text-white font-bold py-3.5 rounded-xl transition-all shadow-lg flex justify-center items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
-                        Ler Chip
+
+                <!-- Botão de Gravação -->
+                <button id="recordBtn" class="w-20 h-20 rounded-full bg-red-600 hover:bg-red-500 text-white flex items-center justify-center shadow-lg transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
+                </button>
+
+                <div class="flex gap-2 w-full mt-2">
+                    <button id="clearVoiceBtn" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-3 rounded-xl transition-all shadow-sm">
+                        Limpar
                     </button>
-                    <button id="ocrFileBtn" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold py-3.5 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 text-sm">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-                        Tirar Foto
+                    <button id="insertVoiceBtn" class="flex-[2] bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                        Inserir na Lista
                     </button>
-                    <input type="file" id="ocrFileInput" accept="image/*" capture="environment" class="hidden" />
                 </div>
             </div>
         </div>
     </div>
-    
-    <canvas id="cameraCanvas" class="hidden"></canvas>
 
     <script>
         const ruleSelect = document.getElementById('ruleSelect');
@@ -276,19 +268,6 @@
         const copyText = document.getElementById('copyText');
         const exportBtn = document.getElementById('exportBtn');
 
-        const cameraBtn = document.getElementById('cameraBtn');
-        const cameraModal = document.getElementById('cameraModal');
-        const closeCameraBtn = document.getElementById('closeCameraBtn');
-        const cameraVideo = document.getElementById('cameraVideo');
-        const captureBtn = document.getElementById('captureBtn');
-        const scanStatus = document.getElementById('scanStatus');
-        const cameraCanvas = document.getElementById('cameraCanvas');
-        
-        const ocrFileBtn = document.getElementById('ocrFileBtn');
-        const ocrFileInput = document.getElementById('ocrFileInput');
-
-        let videoStream = null;
-
         const iconCopy = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>`;
         const iconCheck = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`;
 
@@ -297,7 +276,7 @@
 
         const conversionRules = {
             none: {
-                description: 'Ideal para leitura de ICCIDs. Nenhuma conversão matemática é feita aos números.',
+                description: 'Ideal para leitura de ICCIDs ou códigos de barras. Não aplica nenhuma matemática, apenas organiza os números na tabela.',
                 process: (val) => {
                     const cleanVal = val.trim();
                     if (!cleanVal) return null;
@@ -422,165 +401,153 @@
             reader.readAsArrayBuffer(file);
         });
 
-        // ================= CÂMARA & OCR FOCADO =================
-        async function startCamera() {
-            cameraModal.classList.remove('hidden');
-            captureBtn.disabled = true;
-            scanStatus.innerHTML = "Coloque o chip dentro do <b>quadrado central</b>.";
-            
-            try {
-                // Pede especificamente o focus contínuo para evitar que a imagem desfoque perto
-                videoStream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { 
-                        facingMode: 'environment', 
-                        width: { ideal: 1920 }, 
-                        height: { ideal: 1080 },
-                        advanced: [{ focusMode: "continuous" }]
-                    } 
-                });
-                cameraVideo.srcObject = videoStream;
-                cameraVideo.onloadedmetadata = () => { captureBtn.disabled = false; };
-            } catch (err) {
-                scanStatus.innerHTML = `<span class="text-red-400">Sem acesso ao vídeo ao vivo. Use o botão Tirar Foto.</span>`;
-            }
-        }
-
-        function stopCamera() {
-            cameraModal.classList.add('hidden');
-            if (videoStream) {
-                videoStream.getTracks().forEach(track => track.stop());
-                videoStream = null;
-            }
-        }
-
-        async function processImageFromCanvas() {
-            captureBtn.disabled = true;
-            scanStatus.innerHTML = `<span class="text-cyan-400 animate-pulse">A cortar e focar no chip...</span>`;
-
-            // O Segredo 1: Recortar apenas o quadrado do meio da imagem da câmara
-            // Isto remove a mesa e foca o Tesseract SÓ no chip
-            const videoWidth = cameraVideo.videoWidth;
-            const videoHeight = cameraVideo.videoHeight;
-            // O nosso UI do quadrado representa cerca de 60% da dimensão mais curta
-            const cropSize = Math.min(videoWidth, videoHeight) * 0.6; 
-            
-            const startX = (videoWidth - cropSize) / 2;
-            const startY = (videoHeight - cropSize) / 2;
-
-            // Fazer um Zoom Digital (escala 2x) para a IA ler melhor os números pequenos
-            const scale = 2;
-            cameraCanvas.width = cropSize * scale;
-            cameraCanvas.height = cropSize * scale;
-            
-            const ctx = cameraCanvas.getContext('2d');
-            
-            // Desenha a imagem na tela, já cortada e ampliada
-            ctx.drawImage(cameraVideo, startX, startY, cropSize, cropSize, 0, 0, cropSize * scale, cropSize * scale);
-            
-            await extractICCID(cameraCanvas);
-        }
-
-        ocrFileBtn.addEventListener('click', () => { ocrFileInput.click(); });
+        // ================= DITADO POR VOZ (WEB SPEECH API) =================
+        const openVoiceBtn = document.getElementById('openVoiceBtn');
+        const voiceModal = document.getElementById('voiceModal');
+        const closeVoiceBtn = document.getElementById('closeVoiceBtn');
+        const recordBtn = document.getElementById('recordBtn');
+        const clearVoiceBtn = document.getElementById('clearVoiceBtn');
+        const insertVoiceBtn = document.getElementById('insertVoiceBtn');
         
-        ocrFileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
+        const voiceResultText = document.getElementById('voiceResultText');
+        const voiceInterimText = document.getElementById('voiceInterimText');
+        const voiceStatus = document.getElementById('voiceStatus');
 
-            if (videoStream) {
-                videoStream.getTracks().forEach(track => track.stop());
-                cameraVideo.srcObject = null;
-            }
-            
-            scanStatus.innerHTML = `<span class="text-blue-400 animate-pulse">A processar a sua foto...</span>`;
-            
-            const reader = new FileReader();
-            reader.onload = (evt) => {
-                const img = new Image();
-                img.onload = async () => {
-                    const MAX_DIMENSION = 1000;
-                    let width = img.width;
-                    let height = img.height;
+        let accumulatedVoiceNumbers = "";
+        let isRecording = false;
+        
+        // Verifica se o browser suporta
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition = null;
 
-                    if (width > height && width > MAX_DIMENSION) {
-                        height = Math.round(height * (MAX_DIMENSION / width));
-                        width = MAX_DIMENSION;
-                    } else if (height > width && height > MAX_DIMENSION) {
-                        width = Math.round(width * (MAX_DIMENSION / height));
-                        height = MAX_DIMENSION;
-                    }
+        if (SpeechRecognition) {
+            recognition = new SpeechRecognition();
+            recognition.lang = 'pt-BR'; // pt-BR entende melhor "meia" para 6
+            recognition.continuous = true;
+            recognition.interimResults = true;
 
-                    cameraCanvas.width = width;
-                    cameraCanvas.height = height;
-                    const ctx = cameraCanvas.getContext('2d');
-                    
-                    ctx.drawImage(img, 0, 0, width, height);
-                    
-                    await extractICCID(cameraCanvas);
+            // Transforma palavras em números e remove o resto
+            function processTranscript(text) {
+                let t = text.toLowerCase();
+                const map = {
+                    'zero': '0', 'um': '1', 'dois': '2', 'três': '3', 'tres': '3',
+                    'quatro': '4', 'cinco': '5', 'seis': '6', 'meia': '6',
+                    'sete': '7', 'oito': '8', 'nove': '9'
                 };
-                img.src = evt.target.result;
+                Object.keys(map).forEach(key => {
+                    t = t.replace(new RegExp('\\b' + key + '\\b', 'g'), map[key]);
+                });
+                return t.replace(/\D/g, ''); // Mantém APENAS dígitos
+            }
+
+            recognition.onresult = (event) => {
+                let interimTranscript = '';
+                let finalTranscript = '';
+
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        finalTranscript += event.results[i][0].transcript;
+                    } else {
+                        interimTranscript += event.results[i][0].transcript;
+                    }
+                }
+
+                if (finalTranscript) {
+                    accumulatedVoiceNumbers += processTranscript(finalTranscript);
+                    voiceResultText.textContent = accumulatedVoiceNumbers || "...";
+                }
+
+                if (interimTranscript) {
+                    voiceInterimText.textContent = processTranscript(interimTranscript);
+                } else {
+                    voiceInterimText.textContent = "";
+                }
             };
-            reader.readAsDataURL(file);
-            ocrFileInput.value = '';
+
+            recognition.onerror = (event) => {
+                voiceStatus.innerHTML = `<span class="text-red-400">Erro: ${event.error}. Verifique o microfone.</span>`;
+                stopRecording();
+            };
+
+            recognition.onend = () => {
+                // Se parar sozinho (pausa longa), continua a gravar se isRecording for true
+                if (isRecording) {
+                    try { recognition.start(); } catch(e){}
+                }
+            };
+        } else {
+            alert("O seu navegador não suporta Ditado por Voz. Recomendamos o Google Chrome.");
+        }
+
+        function startRecording() {
+            if(!recognition) return;
+            accumulatedVoiceNumbers = "";
+            voiceResultText.textContent = "...";
+            voiceInterimText.textContent = "";
+            isRecording = true;
+            
+            recordBtn.classList.add('recording-pulse');
+            recordBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>`;
+            voiceStatus.innerHTML = `<span class="text-cyan-400 font-bold animate-pulse">A gravar... Leia os números pausadamente.</span>`;
+            
+            try { recognition.start(); } catch(e){}
+        }
+
+        function stopRecording() {
+            if(!recognition) return;
+            isRecording = false;
+            
+            recordBtn.classList.remove('recording-pulse');
+            recordBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>`;
+            voiceStatus.innerHTML = `Pausado. Clique para gravar novamente ou insira na lista.`;
+            
+            try { recognition.stop(); } catch(e){}
+        }
+
+        openVoiceBtn.addEventListener('click', () => {
+            cameraModal.classList.add('hidden'); // garante que outras modais fecham
+            voiceModal.classList.remove('hidden');
+            if(!accumulatedVoiceNumbers) voiceResultText.textContent = "...";
         });
 
-        async function extractICCID(canvasSource) {
-            try {
-                scanStatus.innerHTML = `<span class="text-cyan-400 animate-pulse">A extrair números com IA...</span>`;
-                
-                // O Segredo 2: Passar uma Whitelist para a IA. 
-                // Isto PROÍBE a IA de ler letras. Ela só pode ver e tentar adivinhar números.
-                const result = await Tesseract.recognize(canvasSource, 'eng', {
-                    logger: m => console.log(m)
-                });
-                
-                let text = result.data.text;
-                
-                // Limpa tudo o que não seja um dígito (garante que junta os números das 5 linhas num só ICCID)
-                let cleanText = text.replace(/\D/g, '');
+        closeVoiceBtn.addEventListener('click', () => {
+            stopRecording();
+            voiceModal.classList.add('hidden');
+        });
 
-                let foundNumber = null;
-                // Procura a sequência do ICCID (normalmente 19 ou 20 dígitos, mas com alguma margem)
-                const iccidMatches = cleanText.match(/\d{18,22}/g);
+        recordBtn.addEventListener('click', () => {
+            if(isRecording) stopRecording();
+            else startRecording();
+        });
 
-                if (iccidMatches && iccidMatches.length > 0) {
-                    foundNumber = iccidMatches[0];
-                } else if (cleanText.length >= 18 && cleanText.length <= 25) {
-                    // Se estiver um pouco fragmentado, agarra nos primeiros 20.
-                    foundNumber = cleanText.substring(0, 20);
+        clearVoiceBtn.addEventListener('click', () => {
+            accumulatedVoiceNumbers = "";
+            voiceResultText.textContent = "...";
+            voiceInterimText.textContent = "";
+            if(!isRecording) voiceStatus.innerHTML = `Clique no botão vermelho para começar.`;
+        });
+
+        insertVoiceBtn.addEventListener('click', () => {
+            stopRecording();
+            if(accumulatedVoiceNumbers.length > 0) {
+                // Altera a regra para "Nenhuma" automaticamente
+                if(ruleSelect.value !== 'none') {
+                    ruleSelect.value = 'none';
+                    ruleSelect.dispatchEvent(new Event('change'));
                 }
 
-                if (foundNumber) {
-                    scanStatus.innerHTML = `<span class="text-green-400 font-bold">✓ Sucesso: ${foundNumber}</span>`;
-                    
-                    if(ruleSelect.value !== 'none') {
-                        ruleSelect.value = 'none';
-                        ruleSelect.dispatchEvent(new Event('change'));
-                    }
-
-                    if (inputText.value.trim() !== '') inputText.value += '\n' + foundNumber;
-                    else inputText.value = foundNumber;
-                    
-                    inputText.dispatchEvent(new Event('input'));
-                    
-                    setTimeout(() => {
-                        scanStatus.innerHTML = "Pronto. Centralize o próximo chip.";
-                        captureBtn.disabled = false;
-                        if(!videoStream && !cameraModal.classList.contains('hidden')) startCamera();
-                    }, 2000);
-
-                } else {
-                    scanStatus.innerHTML = `<span class="text-yellow-400">Tente outra vez e mantenha o chip bem no centro do quadrado.</span>`;
-                    captureBtn.disabled = false;
-                }
-            } catch (error) {
-                scanStatus.innerHTML = `<span class="text-red-400">Erro na IA. Tente novamente.</span>`;
-                captureBtn.disabled = false;
+                if (inputText.value.trim() !== '') inputText.value += '\n' + accumulatedVoiceNumbers;
+                else inputText.value = accumulatedVoiceNumbers;
+                
+                inputText.dispatchEvent(new Event('input'));
+                
+                accumulatedVoiceNumbers = ""; // limpa para a próxima
+                voiceModal.classList.add('hidden');
+            } else {
+                alert("Nenhum número detetado para inserir.");
             }
-        }
+        });
 
-        cameraBtn.addEventListener('click', startCamera);
-        closeCameraBtn.addEventListener('click', stopCamera);
-        captureBtn.addEventListener('click', processImageFromCanvas);
 
         // ================= EXPORTAÇÕES =================
 
