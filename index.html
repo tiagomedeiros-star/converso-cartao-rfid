@@ -210,7 +210,7 @@
     </div>
 
     <!-- MODAL DA CÂMARA (OCR) -->
-    <div id="cameraModal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div id="cameraModal" class="fixed inset-0 z-50 bg-black/95 backdrop-blur-md hidden flex items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col">
             <div class="p-4 border-b border-slate-800 flex justify-between items-center">
                 <h3 class="text-white font-bold flex items-center gap-2">
@@ -224,28 +224,33 @@
             
             <div class="relative bg-black aspect-video flex items-center justify-center overflow-hidden">
                 <video id="cameraVideo" class="w-full h-full object-cover" playsinline autoplay></video>
-                <!-- Guia Visual para o Utilizador -->
                 <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
                     <div class="w-3/4 h-1/3 border-2 border-cyan-500/50 rounded-lg relative">
                         <div class="absolute inset-0 bg-cyan-500/10 backdrop-blur-[1px]"></div>
-                        <!-- Efeito de scanner a passar -->
                         <div class="absolute left-0 right-0 h-0.5 bg-cyan-400 scanner-line"></div>
                     </div>
                 </div>
             </div>
 
-            <div class="p-5 flex flex-col items-center gap-4">
+            <div class="p-5 flex flex-col items-center gap-3">
                 <p id="scanStatus" class="text-sm font-medium text-slate-300 text-center min-h-[40px] flex items-center">
-                    A iniciar câmara... Permita o acesso no seu navegador.
+                    A iniciar vídeo ao vivo...
                 </p>
-                <button id="captureBtn" disabled class="w-full bg-cyan-600 hover:bg-cyan-500 disabled:bg-slate-700 disabled:text-slate-500 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-cyan-600/20">
-                    Capturar & Ler
-                </button>
+                <div class="flex gap-2 w-full">
+                    <button id="captureBtn" disabled class="flex-1 bg-cyan-600 hover:bg-cyan-500 disabled:bg-slate-700 disabled:text-slate-500 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-cyan-600/20">
+                        Capturar Vídeo
+                    </button>
+                    <!-- NOVO BOTÃO: Usar a app de Câmara do telemóvel para chips pequenos -->
+                    <button id="ocrFileBtn" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 text-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                        Tirar Foto (Nativa)
+                    </button>
+                    <input type="file" id="ocrFileInput" accept="image/*" capture="environment" class="hidden" />
+                </div>
             </div>
         </div>
     </div>
     
-    <!-- Canvas Oculto para o OCR -->
     <canvas id="cameraCanvas" class="hidden"></canvas>
 
     <script>
@@ -257,7 +262,6 @@
         const importBtn = document.getElementById('importBtn');
         const fileInput = document.getElementById('fileInput');
         
-        // Elementos da Tabela
         const actionsContainer = document.getElementById('actionsContainer');
         const emptyState = document.getElementById('emptyState');
         const tableContainer = document.getElementById('tableContainer');
@@ -266,7 +270,6 @@
         const resultsFooter = document.getElementById('resultsFooter');
         const resultsCount = document.getElementById('resultsCount');
         
-        // Elementos de Cópia
         const copyDecimalBtn = document.getElementById('copyDecimalBtn');
         const copyDecimalIcon = document.getElementById('copyDecimalIcon');
         const copyDecimalText = document.getElementById('copyDecimalText');
@@ -275,7 +278,7 @@
         const copyText = document.getElementById('copyText');
         const exportBtn = document.getElementById('exportBtn');
 
-        // Elementos da Câmara
+        // Elementos da Câmara & OCR Nativo
         const cameraBtn = document.getElementById('cameraBtn');
         const cameraModal = document.getElementById('cameraModal');
         const closeCameraBtn = document.getElementById('closeCameraBtn');
@@ -283,6 +286,10 @@
         const captureBtn = document.getElementById('captureBtn');
         const scanStatus = document.getElementById('scanStatus');
         const cameraCanvas = document.getElementById('cameraCanvas');
+        
+        const ocrFileBtn = document.getElementById('ocrFileBtn');
+        const ocrFileInput = document.getElementById('ocrFileInput');
+
         let videoStream = null;
 
         const iconCopy = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>`;
@@ -422,21 +429,16 @@
         async function startCamera() {
             cameraModal.classList.remove('hidden');
             captureBtn.disabled = true;
-            scanStatus.textContent = "A iniciar câmara... Permita o acesso no seu navegador.";
+            scanStatus.innerHTML = "Dica: Se o chip for muito pequeno, clique em <b>Tirar Foto (Nativa)</b> em baixo.";
             
             try {
-                // Tenta usar a câmara traseira no telemóvel
                 videoStream = await navigator.mediaDevices.getUserMedia({ 
                     video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } } 
                 });
                 cameraVideo.srcObject = videoStream;
-                
-                cameraVideo.onloadedmetadata = () => {
-                    captureBtn.disabled = false;
-                    scanStatus.innerHTML = "Enquadre o número do chip dentro da caixa e clique em <b>Capturar & Ler</b>.";
-                };
+                cameraVideo.onloadedmetadata = () => { captureBtn.disabled = false; };
             } catch (err) {
-                scanStatus.innerHTML = `<span class="text-red-400">Erro: Não foi possível aceder à câmara. Verifique as permissões.</span>`;
+                scanStatus.innerHTML = `<span class="text-red-400">Sem acesso ao vídeo ao vivo. Use o botão Tirar Foto.</span>`;
             }
         }
 
@@ -448,62 +450,96 @@
             }
         }
 
-        async function processImage() {
+        async function processImageFromCanvas() {
             captureBtn.disabled = true;
             scanStatus.innerHTML = `<span class="text-cyan-400 animate-pulse">A analisar a imagem com Inteligência Artificial...</span>`;
-            
-            // Define o canvas com as dimensões do vídeo
             cameraCanvas.width = cameraVideo.videoWidth;
             cameraCanvas.height = cameraVideo.videoHeight;
             const ctx = cameraCanvas.getContext('2d');
             ctx.drawImage(cameraVideo, 0, 0, cameraCanvas.width, cameraCanvas.height);
+            await extractICCID(cameraCanvas);
+        }
 
+        // Fluxo para a Foto Nativa
+        ocrFileBtn.addEventListener('click', () => { ocrFileInput.click(); });
+        
+        ocrFileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            // Se for telemóvel, pára o vídeo de fundo para poupar bateria/memória
+            if (videoStream) {
+                videoStream.getTracks().forEach(track => track.stop());
+                cameraVideo.srcObject = null;
+            }
+
+            scanStatus.innerHTML = `<span class="text-blue-400 animate-pulse">A processar foto de alta resolução...</span>`;
+            
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+                const img = new Image();
+                img.onload = async () => {
+                    cameraCanvas.width = img.width;
+                    cameraCanvas.height = img.height;
+                    const ctx = cameraCanvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0);
+                    await extractICCID(cameraCanvas);
+                };
+                img.src = evt.target.result;
+            };
+            reader.readAsDataURL(file);
+            
+            // Limpa o input
+            ocrFileInput.value = '';
+        });
+
+        async function extractICCID(canvasSource) {
             try {
-                // Executa o Tesseract no Canvas
-                const result = await Tesseract.recognize(cameraCanvas, 'eng');
+                const result = await Tesseract.recognize(canvasSource, 'eng');
                 const text = result.data.text;
-                console.log("Texto extraído:", text);
-
-                // Procura por ICCIDs: Sequências de dígitos entre 18 e 22 de tamanho
-                // Substitui espaços caso o OCR separe os números
-                const cleanText = text.replace(/\s+/g, ''); 
+                
+                // Limpa todos os espaços e quebras de linha (crucial para chips com 5 linhas de 4 números)
+                // Também transforma "O" e "o" em "0" que é um erro comum do Tesseract em fontes pequenas
+                let cleanText = text.replace(/\s+/g, '').replace(/[Oo]/g, '0').replace(/[Ss]/g, '5');
+                
+                // O ICCID costuma ter entre 18 e 22 dígitos
                 const iccidMatches = cleanText.match(/\d{18,22}/g);
 
                 if (iccidMatches && iccidMatches.length > 0) {
                     const foundNumber = iccidMatches[0];
-                    scanStatus.innerHTML = `<span class="text-green-400 font-bold">✓ ICCID Lido: ${foundNumber}</span>`;
+                    scanStatus.innerHTML = `<span class="text-green-400 font-bold">✓ ICCID: ${foundNumber} guardado!</span>`;
                     
-                    // Altera a regra para "Nenhuma" automaticamente se encontrar um ICCID enorme
                     if(ruleSelect.value !== 'none') {
                         ruleSelect.value = 'none';
                         ruleSelect.dispatchEvent(new Event('change'));
                     }
 
-                    // Adiciona à lista
                     if (inputText.value.trim() !== '') inputText.value += '\n' + foundNumber;
                     else inputText.value = foundNumber;
                     
                     inputText.dispatchEvent(new Event('input'));
                     
-                    // Repõe o estado após 2 segundos para ler o próximo
                     setTimeout(() => {
-                        scanStatus.innerHTML = "Aponte para o próximo chip e clique em <b>Capturar & Ler</b>.";
+                        scanStatus.innerHTML = "Pronto para o próximo. Pode capturar novamente.";
                         captureBtn.disabled = false;
-                    }, 2000);
+                        
+                        // Se perdeu o vídeo, tenta reiniciar (útil se o utilizador fechar a modal e abrir)
+                        if(!videoStream && !cameraModal.classList.contains('hidden')) startCamera();
+                    }, 2500);
 
                 } else {
-                    scanStatus.innerHTML = `<span class="text-yellow-400">Nenhum número completo encontrado. Aproxime a câmara, melhore a luz e tente novamente.</span>`;
+                    scanStatus.innerHTML = `<span class="text-yellow-400">Nenhum número de 18-20 dígitos encontrado. Use a Foto Nativa se estiver desfocado.</span>`;
                     captureBtn.disabled = false;
                 }
             } catch (error) {
-                scanStatus.innerHTML = `<span class="text-red-400">Erro no motor de leitura. Tente novamente.</span>`;
+                scanStatus.innerHTML = `<span class="text-red-400">Erro na IA. Tente novamente.</span>`;
                 captureBtn.disabled = false;
             }
         }
 
         cameraBtn.addEventListener('click', startCamera);
         closeCameraBtn.addEventListener('click', stopCamera);
-        captureBtn.addEventListener('click', processImage);
+        captureBtn.addEventListener('click', processImageFromCanvas);
 
         // ================= EXPORTAÇÕES =================
 
@@ -603,7 +639,6 @@
             document.getElementById('colLast').classList.toggle('hidden', !is26Bits);
             document.getElementById('colFamily').classList.toggle('hidden', !is26Bits);
             
-            // Ocultar coluna Hexadecimal na regra "none" (Apenas Leitura)
             const thHex = document.querySelector('th:nth-child(2)');
             if(thHex) thHex.classList.toggle('hidden', isNone);
 
