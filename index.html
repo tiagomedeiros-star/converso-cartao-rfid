@@ -216,6 +216,8 @@
                     <p id="voiceInterimText" class="font-mono text-slate-500 text-lg break-all italic mt-1"></p>
                 </div>
 
+                <div id="voiceAlertBox" class="hidden w-full bg-red-900/30 border border-red-500/50 rounded-lg p-3 text-red-300 text-xs text-center font-medium"></div>
+
                 <p id="voiceStatus" class="text-sm font-medium text-slate-400 text-center">
                     Clique no botão vermelho e leia os números do chip.
                 </p>
@@ -395,13 +397,13 @@
                     fileInput.value = '';
                 } catch (error) {
                     console.error("Erro ao processar a planilha:", error);
-                    alert("Ocorreu um erro ao ler a folha de cálculo.");
+                    alert("Ocorreu um erro ao ler a folha de cálculo. Verifique se o formato é válido.");
                 }
             };
             reader.readAsArrayBuffer(file);
         });
 
-        // ================= DITADO POR VOZ (WEB SPEECH API) =================
+        // ================= DITADO POR VOZ (WEB SPEECH API) MELHORADO =================
         const openVoiceBtn = document.getElementById('openVoiceBtn');
         const voiceModal = document.getElementById('voiceModal');
         const closeVoiceBtn = document.getElementById('closeVoiceBtn');
@@ -412,21 +414,20 @@
         const voiceResultText = document.getElementById('voiceResultText');
         const voiceInterimText = document.getElementById('voiceInterimText');
         const voiceStatus = document.getElementById('voiceStatus');
+        const voiceAlertBox = document.getElementById('voiceAlertBox');
 
         let accumulatedVoiceNumbers = "";
         let isRecording = false;
         
-        // Verifica se o browser suporta
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         let recognition = null;
 
         if (SpeechRecognition) {
             recognition = new SpeechRecognition();
-            recognition.lang = 'pt-BR'; // pt-BR entende melhor "meia" para 6
+            recognition.lang = 'pt-PT'; // Ajustado para Português de Portugal
             recognition.continuous = true;
             recognition.interimResults = true;
 
-            // Transforma palavras em números e remove o resto
             function processTranscript(text) {
                 let t = text.toLowerCase();
                 const map = {
@@ -437,7 +438,7 @@
                 Object.keys(map).forEach(key => {
                     t = t.replace(new RegExp('\\b' + key + '\\b', 'g'), map[key]);
                 });
-                return t.replace(/\D/g, ''); // Mantém APENAS dígitos
+                return t.replace(/\D/g, ''); 
             }
 
             recognition.onresult = (event) => {
@@ -465,22 +466,34 @@
             };
 
             recognition.onerror = (event) => {
-                voiceStatus.innerHTML = `<span class="text-red-400">Erro: ${event.error}. Verifique o microfone.</span>`;
+                let errorMsg = "Ocorreu um erro no microfone.";
+                if (event.error === 'not-allowed') {
+                    errorMsg = "O acesso ao microfone foi bloqueado pelo navegador. Certifique-se de que o site está alojado com HTTPS (ex: Vercel) e permita o microfone.";
+                } else if (event.error === 'no-speech') {
+                    errorMsg = "Nenhum som detetado. Fale um pouco mais alto.";
+                }
+                
+                voiceAlertBox.textContent = errorMsg;
+                voiceAlertBox.classList.remove('hidden');
                 stopRecording();
             };
 
             recognition.onend = () => {
-                // Se parar sozinho (pausa longa), continua a gravar se isRecording for true
                 if (isRecording) {
                     try { recognition.start(); } catch(e){}
                 }
             };
-        } else {
-            alert("O seu navegador não suporta Ditado por Voz. Recomendamos o Google Chrome.");
         }
 
         function startRecording() {
-            if(!recognition) return;
+            voiceAlertBox.classList.add('hidden');
+            
+            if(!recognition) {
+                voiceAlertBox.textContent = "O seu navegador não suporta Ditado por Voz ou o site não está num servidor seguro (HTTPS). Aloje o ficheiro no Vercel/GitHub para usar esta função.";
+                voiceAlertBox.classList.remove('hidden');
+                return;
+            }
+
             accumulatedVoiceNumbers = "";
             voiceResultText.textContent = "...";
             voiceInterimText.textContent = "";
@@ -505,7 +518,7 @@
         }
 
         openVoiceBtn.addEventListener('click', () => {
-            cameraModal.classList.add('hidden'); // garante que outras modais fecham
+            voiceAlertBox.classList.add('hidden');
             voiceModal.classList.remove('hidden');
             if(!accumulatedVoiceNumbers) voiceResultText.textContent = "...";
         });
@@ -530,7 +543,6 @@
         insertVoiceBtn.addEventListener('click', () => {
             stopRecording();
             if(accumulatedVoiceNumbers.length > 0) {
-                // Altera a regra para "Nenhuma" automaticamente
                 if(ruleSelect.value !== 'none') {
                     ruleSelect.value = 'none';
                     ruleSelect.dispatchEvent(new Event('change'));
@@ -541,7 +553,7 @@
                 
                 inputText.dispatchEvent(new Event('input'));
                 
-                accumulatedVoiceNumbers = ""; // limpa para a próxima
+                accumulatedVoiceNumbers = ""; 
                 voiceModal.classList.add('hidden');
             } else {
                 alert("Nenhum número detetado para inserir.");
