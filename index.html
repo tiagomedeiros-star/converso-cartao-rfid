@@ -8,7 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- SheetJS para ler ficheiros Excel/CSV -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <!-- Tesseract.js para Reconhecimento Ótico (OCR) pela Câmara -->
+    <!-- Tesseract.js para Reconhecimento Ótico (OCR) -->
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     
     <style>
@@ -27,7 +27,6 @@
 
         select option { background-color: #0f172a; color: #f8fafc; }
 
-        /* Animação do Scanner */
         @keyframes scan {
             0% { top: 0%; opacity: 0; }
             10% { opacity: 1; }
@@ -480,7 +479,6 @@
             reader.onload = (evt) => {
                 const img = new Image();
                 img.onload = async () => {
-                    // O SEGREDO DA VELOCIDADE: Reduzir fotos gigantes (4K) para no máximo 1000px
                     const MAX_DIMENSION = 1000;
                     let width = img.width;
                     let height = img.height;
@@ -497,7 +495,6 @@
                     cameraCanvas.height = height;
                     const ctx = cameraCanvas.getContext('2d');
                     
-                    // Desenha a imagem já reduzida
                     ctx.drawImage(img, 0, 0, width, height);
                     
                     await extractICCID(cameraCanvas);
@@ -510,15 +507,19 @@
 
         async function extractICCID(canvasSource) {
             try {
-                scanStatus.innerHTML = `<span class="text-cyan-400 animate-pulse">A aplicar filtro P&B e Inteligência Artificial...</span>`;
+                scanStatus.innerHTML = `<span class="text-cyan-400 animate-pulse">A melhorar foco dos números...</span>`;
                 
-                // PRÉ-PROCESSAMENTO RÁPIDO P&B
                 const ctx = canvasSource.getContext('2d');
                 const imageData = ctx.getImageData(0, 0, canvasSource.width, canvasSource.height);
                 const data = imageData.data;
                 for (let i = 0; i < data.length; i += 4) {
                     const lum = 0.299 * data[i] + 0.587 * data[i+1] + 0.114 * data[i+2];
-                    const color = lum < 130 ? 0 : 255;
+                    
+                    // Escurece os cinzas (tinta preta) e deixa o fundo intacto
+                    let color = lum;
+                    if(lum < 130) color = lum * 0.6; 
+                    else color = Math.min(255, lum * 1.2);
+                    
                     data[i] = color;
                     data[i+1] = color;
                     data[i+2] = color;
@@ -528,12 +529,14 @@
                 const result = await Tesseract.recognize(canvasSource, 'eng');
                 const text = result.data.text;
                 
-                let fixedText = text.replace(/[OoQq]/g, '0') 
+                // Remove todos os espaços e corrige caracteres que a IA costuma confundir com o tamanho do chip
+                let fixedText = text.replace(/[OoQqDd]/g, '0') 
                                     .replace(/[Il|]/g, '1')  
                                     .replace(/[Zz]/g, '2')
                                     .replace(/[Ss]/g, '5')   
                                     .replace(/[B]/g, '8')
-                                    .replace(/[Gg]/g, '6');
+                                    .replace(/[Gg]/g, '6')
+                                    .replace(/\s+/g, '');
                 
                 let cleanText = fixedText.replace(/\D/g, '');
 
@@ -566,7 +569,7 @@
                     }, 2000);
 
                 } else {
-                    scanStatus.innerHTML = `<span class="text-yellow-400">Não foi possível identificar 20 dígitos. Limpe a lente e tente novamente.</span>`;
+                    scanStatus.innerHTML = `<span class="text-yellow-400">Não identificámos os 20 números. Certifique-se de que a foto ficou focada.</span>`;
                     captureBtn.disabled = false;
                 }
             } catch (error) {
