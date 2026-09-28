@@ -215,7 +215,7 @@
             <div class="p-4 border-b border-slate-800 flex justify-between items-center">
                 <h3 class="text-white font-bold flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-cyan-400"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
-                    Leitor de ICCID Otimizado
+                    Leitor de ICCID Rápido
                 </h3>
                 <button id="closeCameraBtn" class="text-slate-400 hover:text-white transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -240,7 +240,6 @@
                     <button id="captureBtn" disabled class="flex-1 bg-cyan-600 hover:bg-cyan-500 disabled:bg-slate-700 disabled:text-slate-500 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-cyan-600/20">
                         Capturar Vídeo
                     </button>
-                    <!-- BOTÃO: Usar a app de Câmara do telemóvel para chips pequenos -->
                     <button id="ocrFileBtn" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 text-sm">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
                         Tirar Foto (Nativa)
@@ -267,6 +266,11 @@
         const tableContainer = document.getElementById('tableContainer');
         const resultsTable = document.getElementById('resultsTable');
         const resultsTableBody = document.getElementById('resultsTableBody');
+        const colFirst = document.getElementById('colFirst');
+        const colMid = document.getElementById('colMid');
+        const colLast = document.getElementById('colLast');
+        const colFamily = document.getElementById('colFamily');
+        const colReversedHex = document.getElementById('colReversedHex');
         const resultsFooter = document.getElementById('resultsFooter');
         const resultsCount = document.getElementById('resultsCount');
         
@@ -425,7 +429,7 @@
             reader.readAsArrayBuffer(file);
         });
 
-        // ================= CÂMARA & OCR MELHORADO =================
+        // ================= CÂMARA & OCR MELHORADO E RÁPIDO =================
         async function startCamera() {
             cameraModal.classList.remove('hidden');
             captureBtn.disabled = true;
@@ -470,14 +474,32 @@
                 cameraVideo.srcObject = null;
             }
             
+            scanStatus.innerHTML = `<span class="text-blue-400 animate-pulse">A otimizar a imagem rapidamente...</span>`;
+            
             const reader = new FileReader();
             reader.onload = (evt) => {
                 const img = new Image();
                 img.onload = async () => {
-                    cameraCanvas.width = img.width;
-                    cameraCanvas.height = img.height;
+                    // O SEGREDO DA VELOCIDADE: Reduzir fotos gigantes (4K) para no máximo 1000px
+                    const MAX_DIMENSION = 1000;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height && width > MAX_DIMENSION) {
+                        height = Math.round(height * (MAX_DIMENSION / width));
+                        width = MAX_DIMENSION;
+                    } else if (height > width && height > MAX_DIMENSION) {
+                        width = Math.round(width * (MAX_DIMENSION / height));
+                        height = MAX_DIMENSION;
+                    }
+
+                    cameraCanvas.width = width;
+                    cameraCanvas.height = height;
                     const ctx = cameraCanvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0);
+                    
+                    // Desenha a imagem já reduzida
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
                     await extractICCID(cameraCanvas);
                 };
                 img.src = evt.target.result;
@@ -488,18 +510,14 @@
 
         async function extractICCID(canvasSource) {
             try {
-                scanStatus.innerHTML = `<span class="text-blue-400 animate-pulse">A otimizar foco e contraste...</span>`;
+                scanStatus.innerHTML = `<span class="text-cyan-400 animate-pulse">A aplicar filtro P&B e Inteligência Artificial...</span>`;
                 
-                // PRÉ-PROCESSAMENTO: Transforma a imagem em Preto & Branco extremo
-                // Isto retira a sombra da foto e destaca os números pretos contra o chip branco
+                // PRÉ-PROCESSAMENTO RÁPIDO P&B
                 const ctx = canvasSource.getContext('2d');
                 const imageData = ctx.getImageData(0, 0, canvasSource.width, canvasSource.height);
                 const data = imageData.data;
                 for (let i = 0; i < data.length; i += 4) {
-                    const r = data[i], g = data[i+1], b = data[i+2];
-                    // Calcula a luminosidade
-                    const lum = 0.299 * r + 0.587 * g + 0.114 * b;
-                    // Se for mais escuro que cinza médio, vira preto absoluto, senão branco
+                    const lum = 0.299 * data[i] + 0.587 * data[i+1] + 0.114 * data[i+2];
                     const color = lum < 130 ? 0 : 255;
                     data[i] = color;
                     data[i+1] = color;
@@ -507,31 +525,24 @@
                 }
                 ctx.putImageData(imageData, 0, 0);
 
-                scanStatus.innerHTML = `<span class="text-cyan-400 animate-pulse">A analisar blocos numéricos...</span>`;
-                
                 const result = await Tesseract.recognize(canvasSource, 'eng');
                 const text = result.data.text;
                 
-                // AUTO-CORREÇÃO: Corrige os erros mais comuns do OCR ao ler letras pequeninas
-                // e limpa todos os espaços e quebras de linha para juntar as 5 linhas do chip
-                let fixedText = text.replace(/[OoQq]/g, '0') // Confusão entre O e Zero
-                                    .replace(/[Il|]/g, '1')  // Confusão entre L minúsculo/I e Um
+                let fixedText = text.replace(/[OoQq]/g, '0') 
+                                    .replace(/[Il|]/g, '1')  
                                     .replace(/[Zz]/g, '2')
-                                    .replace(/[Ss]/g, '5')   // Confusão entre S e Cinco
+                                    .replace(/[Ss]/g, '5')   
                                     .replace(/[B]/g, '8')
                                     .replace(/[Gg]/g, '6');
                 
-                // Mantém apenas e só os números, colando as linhas todas
                 let cleanText = fixedText.replace(/\D/g, '');
 
                 let foundNumber = null;
-                // Procura por sequências longas típicas de ICCID (18 a 22 digitos)
                 const iccidMatches = cleanText.match(/\d{18,22}/g);
 
                 if (iccidMatches && iccidMatches.length > 0) {
                     foundNumber = iccidMatches[0];
                 } else if (cleanText.length >= 18 && cleanText.length <= 25) {
-                    // Fallback: Se o OCR encontrou cerca de 20 números perdidos na foto, pega os 20 primeiros
                     foundNumber = cleanText.substring(0, 20);
                 }
 
@@ -552,14 +563,14 @@
                         scanStatus.innerHTML = "Pode fotografar o próximo chip.";
                         captureBtn.disabled = false;
                         if(!videoStream && !cameraModal.classList.contains('hidden')) startCamera();
-                    }, 2500);
+                    }, 2000);
 
                 } else {
-                    scanStatus.innerHTML = `<span class="text-yellow-400">Não foi possível identificar 20 dígitos. Limpe a lente e tire uma foto nítida (Nativa).</span>`;
+                    scanStatus.innerHTML = `<span class="text-yellow-400">Não foi possível identificar 20 dígitos. Limpe a lente e tente novamente.</span>`;
                     captureBtn.disabled = false;
                 }
             } catch (error) {
-                scanStatus.innerHTML = `<span class="text-red-400">Falha ao iniciar o motor OCR. Verifique a ligação.</span>`;
+                scanStatus.innerHTML = `<span class="text-red-400">Erro na IA. Tente novamente.</span>`;
                 captureBtn.disabled = false;
             }
         }
